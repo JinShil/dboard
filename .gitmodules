@@ -1,0 +1,3 @@
+[submodule "memory_mapped_io"]
+	path = memory_mapped_io
+	url = https://github.com/JinShil/memory_mapped_io.git

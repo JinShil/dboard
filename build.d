@@ -33,7 +33,7 @@ void main(string[] args)
 
 	auto sourceFiles = sourceDir
 		.dirEntries("*.d", SpanMode.depth)
-		.filter!(a => !a.name.startsWith("source/runtime")) // runtime will be imported automatically
+		.filter!(a => !a.name.startsWith("source/druntime")) // runtime will be imported automatically
 		.map!"a.name"
 		.join(" ");
 
@@ -41,17 +41,17 @@ void main(string[] args)
     // compile to temporary assembly file
     cmd = "arm-none-eabi-gdc -c -Os -nophoboslib -nostdinc -nodefaultlibs -nostdlib"
           ~ " -mthumb -mcpu=cortex-m4 -mtune=cortex-m4"
-          ~ " -Isource/runtime" // to import runtime automatically
+          ~ " -Isource/druntime" // to import runtime automatically
           ~ " -fno-bounds-check -fno-invariants -fno-in -fno-out" // -fno-assert gives me a broken binary          
           ~ " -ffunction-sections"
           ~ " -fdata-sections" 
           
-          ~ " " ~ sourceFiles
+          ~ " " ~ sourceFiles ~ " memory_mapped_io/source/mmio.d"
           ~ " -o " ~ objectFile;                  
     run(cmd);
     
     // link, creating executable
-    cmd = "arm-none-eabi-ld " ~ objectFile ~ " -Tlinker/linker.ld --gc-sections -o " ~ outputFile;
+    cmd = "arm-none-eabi-ld " ~ objectFile ~ " -Tlink.ld --gc-sections -o " ~ outputFile;
     run(cmd);
     
     // display the size

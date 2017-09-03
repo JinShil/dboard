@@ -40,7 +40,7 @@ void main(string[] args)
 	
     // compile to temporary assembly file
     cmd = "arm-none-eabi-gdc -c -Os -nophoboslib -nostdinc -nodefaultlibs -nostdlib"
-          ~ " -mthumb -mcpu=cortex-m4 -mtune=cortex-m4"
+          ~ " -mthumb -mcpu=cortex-m0 -mtune=cortex-m0"
           ~ " -Isource/druntime" // to import runtime automatically
           ~ " -fno-bounds-check -fno-invariants -fno-in -fno-out" // -fno-assert gives me a broken binary          
           ~ " -ffunction-sections"
@@ -51,7 +51,7 @@ void main(string[] args)
     run(cmd);
     
     // link, creating executable
-    cmd = "arm-none-eabi-ld " ~ objectFile ~ " -Tlink.ld --gc-sections -o " ~ outputFile;
+    cmd = "arm-none-eabi-ld --demangle=dlang " ~ objectFile ~ " -Tlink.ld --gc-sections -o " ~ outputFile;
     run(cmd);
     
     // display the size

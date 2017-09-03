@@ -1,11 +1,11 @@
 
 MEMORY
 {
-  FLASH      (rx)  : ORIGIN = 0x00000000, LENGTH = 0x00002000
-  SRAM       (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00008000
+    FLASH (rx)  : ORIGIN = 0x00000000, LENGTH = 0x00002000
+    SRAM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00008000
 }
 
-_stackStart = ORIGIN(SRAM) + 4k; /* Falling stack starts at the end of the CCM */
+_stackStart = ORIGIN(SRAM) + 4k; /* Falling stack */
 
 SECTIONS
 {
@@ -27,9 +27,7 @@ SECTIONS
     .text :
     {
         LONG(_stackStart);                 /* Initial stack pointer */
-        KEEP(*(*.ResetHandler))            /* Pointer to program's entry point */
-        LONG(0)                            /* Pointer to non-maskable interrupt handler (ignore for now) */
-        KEEP(*(*.HardFaultHandler))        /* Pointer to hard fault handler */
+        KEEP(*(*._vectorTable))            /* Interrupt vector table */
         *(.text)                           /* Our executable code */
         *(.text*) 
     } > FLASH

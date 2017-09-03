@@ -1,72 +1,12 @@
 module atsamd21g18a.dsu;
 
-import mmio;
+import mvf.mmio;
 
 /*****************************************************************************
  Device Service Unit
 */
 final abstract class DSU : Peripheral!(0x41002000)
 {
-    /*************************************************************************
-     Address
-    */
-    final abstract class ADDR : Register!(0x4)
-    {
-        /*********************************************************************
-         Address
-        */
-        alias ADDR = BitField!(31, 2, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Component Identification 0
-    */
-    final abstract class CID0 : Register!(0x1ff0)
-    {
-        /*********************************************************************
-         Preamble Byte 0
-        */
-        alias PREAMBLEB0 = BitField!(7, 0, Mutability.r);
-    }
-
-    /*************************************************************************
-     Component Identification 1
-    */
-    final abstract class CID1 : Register!(0x1ff4)
-    {
-        /*********************************************************************
-         Preamble
-        */
-        alias PREAMBLE = BitField!(3, 0, Mutability.r);
-
-        /*********************************************************************
-         Component Class
-        */
-        alias CCLASS = BitField!(7, 4, Mutability.r);
-    }
-
-    /*************************************************************************
-     Component Identification 2
-    */
-    final abstract class CID2 : Register!(0x1ff8)
-    {
-        /*********************************************************************
-         Preamble Byte 2
-        */
-        alias PREAMBLEB2 = BitField!(7, 0, Mutability.r);
-    }
-
-    /*************************************************************************
-     Component Identification 3
-    */
-    final abstract class CID3 : Register!(0x1ffc)
-    {
-        /*********************************************************************
-         Preamble Byte 3
-        */
-        alias PREAMBLEB3 = BitField!(7, 0, Mutability.rw);
-    }
-
     /*************************************************************************
      Control
     */
@@ -91,6 +31,90 @@ final abstract class DSU : Peripheral!(0x41002000)
          Chip Erase
         */
         alias CE = Bit!(4, Mutability.w);
+    }
+
+    /*************************************************************************
+     Status A
+    */
+    final abstract class STATUSA : Register!(0x1)
+    {
+        /*********************************************************************
+         Done
+        */
+        alias DONE = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         CPU Reset Phase Extension
+        */
+        alias CRSTEXT = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Bus Error
+        */
+        alias BERR = Bit!(2, Mutability.rw);
+
+        /*********************************************************************
+         Failure
+        */
+        alias FAIL = Bit!(3, Mutability.rw);
+
+        /*********************************************************************
+         Protection Error
+        */
+        alias PERR = Bit!(4, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Status B
+    */
+    final abstract class STATUSB : Register!(0x2)
+    {
+        /*********************************************************************
+         Protected
+        */
+        alias PROT = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Debugger Present
+        */
+        alias DBGPRES = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Debug Communication Channel 0 Dirty
+        */
+        alias DCCD0 = Bit!(2, Mutability.rw);
+
+        /*********************************************************************
+         Debug Communication Channel 1 Dirty
+        */
+        alias DCCD1 = Bit!(3, Mutability.rw);
+
+        /*********************************************************************
+         Hot-Plugging Enable
+        */
+        alias HPE = Bit!(4, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Address
+    */
+    final abstract class ADDR : Register!(0x4)
+    {
+        /*********************************************************************
+         Address
+        */
+        alias ADDR = BitField!(31, 2, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Length
+    */
+    final abstract class LENGTH : Register!(0x8)
+    {
+        /*********************************************************************
+         Length
+        */
+        alias LENGTH = BitField!(31, 2, Mutability.rw);
     }
 
     /*************************************************************************
@@ -162,17 +186,6 @@ final abstract class DSU : Peripheral!(0x41002000)
     }
 
     /*************************************************************************
-     Coresight ROM Table End
-    */
-    final abstract class END : Register!(0x1008)
-    {
-        /*********************************************************************
-         End Marker
-        */
-        alias END = BitField!(31, 0, Mutability.rw);
-    }
-
-    /*************************************************************************
      Coresight ROM Table Entry n
     */
     final abstract class ENTRY1 : Register!(0x1000)
@@ -214,14 +227,14 @@ final abstract class DSU : Peripheral!(0x41002000)
     }
 
     /*************************************************************************
-     Length
+     Coresight ROM Table End
     */
-    final abstract class LENGTH : Register!(0x8)
+    final abstract class END : Register!(0x1008)
     {
         /*********************************************************************
-         Length
+         End Marker
         */
-        alias LENGTH = BitField!(31, 2, Mutability.rw);
+        alias END = BitField!(31, 0, Mutability.rw);
     }
 
     /*************************************************************************
@@ -233,6 +246,22 @@ final abstract class DSU : Peripheral!(0x41002000)
          System Memory Present
         */
         alias SMEMP = Bit!(0, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Peripheral Identification 4
+    */
+    final abstract class PID4 : Register!(0x1fd0)
+    {
+        /*********************************************************************
+         JEP-106 Continuation Code
+        */
+        alias JEPCC = BitField!(3, 0, Mutability.rw);
+
+        /*********************************************************************
+         4KB Count
+        */
+        alias FKBC = BitField!(7, 4, Mutability.r);
     }
 
     /*************************************************************************
@@ -300,80 +329,51 @@ final abstract class DSU : Peripheral!(0x41002000)
     }
 
     /*************************************************************************
-     Peripheral Identification 4
+     Component Identification 0
     */
-    final abstract class PID4 : Register!(0x1fd0)
+    final abstract class CID0 : Register!(0x1ff0)
     {
         /*********************************************************************
-         JEP-106 Continuation Code
+         Preamble Byte 0
         */
-        alias JEPCC = BitField!(3, 0, Mutability.rw);
-
-        /*********************************************************************
-         4KB Count
-        */
-        alias FKBC = BitField!(7, 4, Mutability.r);
+        alias PREAMBLEB0 = BitField!(7, 0, Mutability.r);
     }
 
     /*************************************************************************
-     Status A
+     Component Identification 1
     */
-    final abstract class STATUSA : Register!(0x1)
+    final abstract class CID1 : Register!(0x1ff4)
     {
         /*********************************************************************
-         Done
+         Preamble
         */
-        alias DONE = Bit!(0, Mutability.rw);
+        alias PREAMBLE = BitField!(3, 0, Mutability.r);
 
         /*********************************************************************
-         CPU Reset Phase Extension
+         Component Class
         */
-        alias CRSTEXT = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Bus Error
-        */
-        alias BERR = Bit!(2, Mutability.rw);
-
-        /*********************************************************************
-         Failure
-        */
-        alias FAIL = Bit!(3, Mutability.rw);
-
-        /*********************************************************************
-         Protection Error
-        */
-        alias PERR = Bit!(4, Mutability.rw);
+        alias CCLASS = BitField!(7, 4, Mutability.r);
     }
 
     /*************************************************************************
-     Status B
+     Component Identification 2
     */
-    final abstract class STATUSB : Register!(0x2)
+    final abstract class CID2 : Register!(0x1ff8)
     {
         /*********************************************************************
-         Protected
+         Preamble Byte 2
         */
-        alias PROT = Bit!(0, Mutability.rw);
+        alias PREAMBLEB2 = BitField!(7, 0, Mutability.r);
+    }
 
+    /*************************************************************************
+     Component Identification 3
+    */
+    final abstract class CID3 : Register!(0x1ffc)
+    {
         /*********************************************************************
-         Debugger Present
+         Preamble Byte 3
         */
-        alias DBGPRES = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Debug Communication Channel 0 Dirty
-        */
-        alias DCCD0 = Bit!(2, Mutability.rw);
-
-        /*********************************************************************
-         Debug Communication Channel 1 Dirty
-        */
-        alias DCCD1 = Bit!(3, Mutability.rw);
-
-        /*********************************************************************
-         Hot-Plugging Enable
-        */
-        alias HPE = Bit!(4, Mutability.rw);
+        alias PREAMBLEB3 = BitField!(7, 0, Mutability.rw);
     }
 }

@@ -1,12 +1,28 @@
 module atsamd21g18a.evsys;
 
-import mmio;
+import mvf.mmio;
 
 /*****************************************************************************
  Event System Interface
 */
 final abstract class EVSYS : Peripheral!(0x42000400)
 {
+    /*************************************************************************
+     Control
+    */
+    final abstract class CTRL : Register!(00)
+    {
+        /*********************************************************************
+         Software Reset
+        */
+        alias SWRST = Bit!(0, Mutability.w);
+
+        /*********************************************************************
+         Generic Clock Requests
+        */
+        alias GCLKREQ = Bit!(4, Mutability.rw);
+    }
+
     /*************************************************************************
      Channel
     */
@@ -83,6 +99,33 @@ final abstract class EVSYS : Peripheral!(0x42000400)
          Edge Detection Selection
         */
         alias EDGSEL = BitField!(27, 26, Mutability.rw, EDGSELValues);
+    }
+
+    /*************************************************************************
+     User Multiplexer
+    */
+    final abstract class USER : Register!(0x8)
+    {
+        /*********************************************************************
+         User Multiplexer Selection
+        */
+        alias USER = BitField!(4, 0, Mutability.rw);
+
+        /*****************************************************************
+         CHANNEL's possible values
+        */
+        enum CHANNELValues
+        {
+            /*************************************************************
+             No Channel Output Selected
+            */
+            _0 = 0x0,
+        }
+
+        /*********************************************************************
+         Channel Event Selection
+        */
+        alias CHANNEL = BitField!(12, 8, Mutability.rw, CHANNELValues);
     }
 
     /*************************************************************************
@@ -209,22 +252,6 @@ final abstract class EVSYS : Peripheral!(0x42000400)
          Channel 11 Busy
         */
         alias CHBUSY11 = Bit!(27, Mutability.r);
-    }
-
-    /*************************************************************************
-     Control
-    */
-    final abstract class CTRL : Register!(00)
-    {
-        /*********************************************************************
-         Software Reset
-        */
-        alias SWRST = Bit!(0, Mutability.w);
-
-        /*********************************************************************
-         Generic Clock Requests
-        */
-        alias GCLKREQ = Bit!(4, Mutability.rw);
     }
 
     /*************************************************************************
@@ -603,32 +630,5 @@ final abstract class EVSYS : Peripheral!(0x42000400)
          Channel 11 Event Detection
         */
         alias EVD11 = Bit!(27, Mutability.rw);
-    }
-
-    /*************************************************************************
-     User Multiplexer
-    */
-    final abstract class USER : Register!(0x8)
-    {
-        /*********************************************************************
-         User Multiplexer Selection
-        */
-        alias USER = BitField!(4, 0, Mutability.rw);
-
-        /*****************************************************************
-         CHANNEL's possible values
-        */
-        enum CHANNELValues
-        {
-            /*************************************************************
-             No Channel Output Selected
-            */
-            _0 = 0x0,
-        }
-
-        /*********************************************************************
-         Channel Event Selection
-        */
-        alias CHANNEL = BitField!(12, 8, Mutability.rw, CHANNELValues);
     }
 }

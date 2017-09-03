@@ -1,6 +1,6 @@
 module atsamd21g18a.dac;
 
-import mmio;
+import mvf.mmio;
 
 /*****************************************************************************
  Digital Analog Converter
@@ -83,28 +83,6 @@ final abstract class DAC : Peripheral!(0x42004800)
          Reference Selection
         */
         alias REFSEL = BitField!(7, 6, Mutability.rw, REFSELValues);
-    }
-
-    /*************************************************************************
-     Data
-    */
-    final abstract class DATA : Register!(0x8)
-    {
-        /*********************************************************************
-         Data value to be converted
-        */
-        alias DATA = BitField!(15, 0, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Data Buffer
-    */
-    final abstract class DATABUF : Register!(0xc)
-    {
-        /*********************************************************************
-         Data Buffer
-        */
-        alias DATABUF = BitField!(15, 0, Mutability.rw);
     }
 
     /*************************************************************************
@@ -195,5 +173,27 @@ final abstract class DAC : Peripheral!(0x42004800)
          Synchronization Busy Status
         */
         alias SYNCBUSY = Bit!(7, Mutability.r);
+    }
+
+    /*************************************************************************
+     Data
+    */
+    final abstract class DATA : Register!(0x8)
+    {
+        /*********************************************************************
+         Data value to be converted
+        */
+        alias DATA = BitField!(15, 0, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Data Buffer
+    */
+    final abstract class DATABUF : Register!(0xc)
+    {
+        /*********************************************************************
+         Data Buffer
+        */
+        alias DATABUF = BitField!(15, 0, Mutability.rw);
     }
 }

@@ -1,12 +1,48 @@
 module atsamd21g18a.i2s;
 
-import mmio;
+import mvf.mmio;
 
 /*****************************************************************************
  Inter-IC Sound Interface
 */
 final abstract class I2S : Peripheral!(0x42005000)
 {
+    /*************************************************************************
+     Control A
+    */
+    final abstract class CTRLA : Register!(00)
+    {
+        /*********************************************************************
+         Software Reset
+        */
+        alias SWRST = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Enable
+        */
+        alias ENABLE = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Clock Unit 0 Enable
+        */
+        alias CKEN0 = Bit!(2, Mutability.rw);
+
+        /*********************************************************************
+         Clock Unit 1 Enable
+        */
+        alias CKEN1 = Bit!(3, Mutability.rw);
+
+        /*********************************************************************
+         Serializer 0 Enable
+        */
+        alias SEREN0 = Bit!(4, Mutability.rw);
+
+        /*********************************************************************
+         Serializer 1 Enable
+        */
+        alias SEREN1 = Bit!(5, Mutability.rw);
+    }
+
     /*************************************************************************
      Clock Unit n Control
     */
@@ -153,7 +189,7 @@ final abstract class I2S : Peripheral!(0x42005000)
         enum MCKSELValues
         {
             /*************************************************************
-             clk_gen_n is used as Master Clock n source
+             GCLK_I2S_n is used as Master Clock n source
             */
             GCLK = 0x0,
 
@@ -344,7 +380,7 @@ final abstract class I2S : Peripheral!(0x42005000)
         enum MCKSELValues
         {
             /*************************************************************
-             clk_gen_n is used as Master Clock n source
+             GCLK_I2S_n is used as Master Clock n source
             */
             GCLK = 0x0,
 
@@ -388,63 +424,6 @@ final abstract class I2S : Peripheral!(0x42005000)
          Master Clock Output Invert
         */
         alias MCKOUTINV = Bit!(31, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Control A
-    */
-    final abstract class CTRLA : Register!(00)
-    {
-        /*********************************************************************
-         Software Reset
-        */
-        alias SWRST = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Enable
-        */
-        alias ENABLE = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Clock Unit 0 Enable
-        */
-        alias CKEN0 = Bit!(2, Mutability.rw);
-
-        /*********************************************************************
-         Clock Unit 1 Enable
-        */
-        alias CKEN1 = Bit!(3, Mutability.rw);
-
-        /*********************************************************************
-         Serializer 0 Enable
-        */
-        alias SEREN0 = Bit!(4, Mutability.rw);
-
-        /*********************************************************************
-         Serializer 1 Enable
-        */
-        alias SEREN1 = Bit!(5, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Data n
-    */
-    final abstract class DATA1 : Register!(0x30)
-    {
-        /*********************************************************************
-         Sample Data
-        */
-        alias DATA = BitField!(31, 0, Mutability.rw);
-    }
-    /*************************************************************************
-     Data n
-    */
-    final abstract class DATA2 : Register!(0x34)
-    {
-        /*********************************************************************
-         Sample Data
-        */
-        alias DATA = BitField!(31, 0, Mutability.rw);
     }
 
     /*************************************************************************
@@ -586,6 +565,52 @@ final abstract class I2S : Peripheral!(0x42005000)
     }
 
     /*************************************************************************
+     Synchronization Status
+    */
+    final abstract class SYNCBUSY : Register!(0x18)
+    {
+        /*********************************************************************
+         Software Reset Synchronization Status
+        */
+        alias SWRST = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Enable Synchronization Status
+        */
+        alias ENABLE = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Clock Unit 0 Enable Synchronization Status
+        */
+        alias CKEN0 = Bit!(2, Mutability.rw);
+
+        /*********************************************************************
+         Clock Unit 1 Enable Synchronization Status
+        */
+        alias CKEN1 = Bit!(3, Mutability.rw);
+
+        /*********************************************************************
+         Serializer 0 Enable Synchronization Status
+        */
+        alias SEREN0 = Bit!(4, Mutability.rw);
+
+        /*********************************************************************
+         Serializer 1 Enable Synchronization Status
+        */
+        alias SEREN1 = Bit!(5, Mutability.rw);
+
+        /*********************************************************************
+         Data 0 Synchronization Status
+        */
+        alias DATA0 = Bit!(8, Mutability.rw);
+
+        /*********************************************************************
+         Data 1 Synchronization Status
+        */
+        alias DATA1 = Bit!(9, Mutability.rw);
+    }
+
+    /*************************************************************************
      Serializer n Control
     */
     final abstract class SERCTRL1 : Register!(0x20)
@@ -606,7 +631,7 @@ final abstract class I2S : Peripheral!(0x42005000)
             TX = 0x1,
 
             /*************************************************************
-             Receive 1 PDM data on each clock edge
+             Receive one PDM data on each serial clock edge
             */
             PDM2 = 0x2,
         }
@@ -937,7 +962,7 @@ final abstract class I2S : Peripheral!(0x42005000)
             TX = 0x1,
 
             /*************************************************************
-             Receive 1 PDM data on each clock edge
+             Receive one PDM data on each serial clock edge
             */
             PDM2 = 0x2,
         }
@@ -1249,48 +1274,23 @@ final abstract class I2S : Peripheral!(0x42005000)
     }
 
     /*************************************************************************
-     Synchronization Status
+     Data n
     */
-    final abstract class SYNCBUSY : Register!(0x18)
+    final abstract class DATA1 : Register!(0x30)
     {
         /*********************************************************************
-         Software Reset Synchronization Status
+         Sample Data
         */
-        alias SWRST = Bit!(0, Mutability.rw);
-
+        alias DATA = BitField!(31, 0, Mutability.rw);
+    }
+    /*************************************************************************
+     Data n
+    */
+    final abstract class DATA2 : Register!(0x34)
+    {
         /*********************************************************************
-         Enable Synchronization Status
+         Sample Data
         */
-        alias ENABLE = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Clock Unit 0 Enable Synchronization Status
-        */
-        alias CKEN0 = Bit!(2, Mutability.rw);
-
-        /*********************************************************************
-         Clock Unit 1 Enable Synchronization Status
-        */
-        alias CKEN1 = Bit!(3, Mutability.rw);
-
-        /*********************************************************************
-         Serializer 0 Enable Synchronization Status
-        */
-        alias SEREN0 = Bit!(4, Mutability.rw);
-
-        /*********************************************************************
-         Serializer 1 Enable Synchronization Status
-        */
-        alias SEREN1 = Bit!(5, Mutability.rw);
-
-        /*********************************************************************
-         Data 0 Synchronization Status
-        */
-        alias DATA0 = Bit!(8, Mutability.rw);
-
-        /*********************************************************************
-         Data 1 Synchronization Status
-        */
-        alias DATA1 = Bit!(9, Mutability.rw);
+        alias DATA = BitField!(31, 0, Mutability.rw);
     }
 }

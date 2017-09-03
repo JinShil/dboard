@@ -1,6 +1,6 @@
 module atsamd21g18a.pac0;
 
-import mmio;
+import mvf.mmio;
 
 /*****************************************************************************
  Peripheral Access Controller 0

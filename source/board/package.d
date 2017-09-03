@@ -1,6 +1,11 @@
 module board;
 
 import board.trace;
+import atsamd21g18a.dmac;
+import atsamd21g18a.hmatrix;
+import atsamd21g18a.nvmctrl;
+import atsamd21g18a.usb;
+import atsamd21g18a.sysctrl;
 
 private alias ISR = void function(); // Alias Interrupt Service Routine function pointers
 
@@ -55,6 +60,8 @@ extern(C) immutable ISR[43] _vectorTable =
 private void defaultHandler()
 {
     writeln("Default Handler");
+    while(true)
+    { }
 }
 
 // defined in the linker
@@ -64,16 +71,10 @@ private extern(C) extern __gshared ubyte __data_end__;
 private extern(C) extern __gshared ubyte __bss_start__;
 private extern(C) extern __gshared ubyte __bss_end__;
 
+private extern void main();
+
 private void onReset()
 {
-    // import gcc.builtins;
-
-    // // copy data segment out of ROM and into RAM
-    // memcpy(&__data_start__, &__text_end__, &__data_end__ - &__data_start__);
-
-    // // zero out variables initialized to void
-    // memset(&__bss_start__, 0, &__bss_end__ - &__bss_start__);
-
     // copy data segment out of ROM and into RAM
     size_t dataSize = &__data_end__ - &__data_start__;
     immutable(byte[]) dataROM = (cast(immutable byte*)&__text_end__)[0 .. dataSize];
@@ -85,10 +86,46 @@ private void onReset()
     byte[] bss = (cast(byte*)&__bss_start__)[0 .. bssSize];
     bss[] = 0;
 
-    while(true)
+    // CRAMC0
+    HMATRIX.SFR4.SFR = 2;
+    
+    // Change default QOS values to have the best performance and correct USB behaviour
+    with(USB.DEVICE.QOSCTRL)
     {
-        writeln("Hello");
+        CQOS = CQOSValues.MEDIUM;
+        DQOS = DQOSValues.MEDIUM;
     }
+
+    with(DMAC.QOSCTRL)
+    {
+        DQOS = DQOSValues.MEDIUM;
+        FQOS = FQOSValues.MEDIUM;
+        WRBQOS = WRBQOSValues.MEDIUM;
+    }
+
+    // Overwriting the default value of the NVMCTRL.CTRLB.MANW bit (errata reference 13134)
+    NVMCTRL.CTRLB.MANW = 1;
+
+    // configure clocks
+
+    // Various bits in the INTFLAG register can be set to one at startup.
+	// This will ensure that these bits are cleared
+    with(SYSCTRL.INTFLAG)
+    {
+        setValue
+        !(
+              BOD33DET, true
+            , BOD33RDY, true
+            , DFLLRDY,  true
+        );
+    }
+
+    // Set flash wait states
+    NVMCTRL.CTRLB.RWS = 2;
+
+    
+
+    main();
 }
 
 private void onNMI()

@@ -46,7 +46,7 @@ void main(string[] args)
           ~ " -ffunction-sections"
           ~ " -fdata-sections" 
           
-          ~ " " ~ sourceFiles ~ " memory_mapped_io/source/mmio.d"
+          ~ " " ~ sourceFiles
           ~ " -o " ~ objectFile;                  
     run(cmd);
     

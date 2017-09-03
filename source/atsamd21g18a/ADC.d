@@ -1,12 +1,80 @@
 module atsamd21g18a.adc;
 
-import mmio;
+import mvf.mmio;
 
 /*****************************************************************************
  Analog Digital Converter
 */
 final abstract class ADC : Peripheral!(0x42004000)
 {
+    /*************************************************************************
+     Control A
+    */
+    final abstract class CTRLA : Register!(00)
+    {
+        /*********************************************************************
+         Software Reset
+        */
+        alias SWRST = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Enable
+        */
+        alias ENABLE = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Run in Standby
+        */
+        alias RUNSTDBY = Bit!(2, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Reference Control
+    */
+    final abstract class REFCTRL : Register!(0x1)
+    {
+        /*****************************************************************
+         REFSEL's possible values
+        */
+        enum REFSELValues
+        {
+            /*************************************************************
+             1.0V voltage reference
+            */
+            INT1V = 0x0,
+
+            /*************************************************************
+             1/1.48 VDDANA
+            */
+            INTVCC0 = 0x1,
+
+            /*************************************************************
+             1/2 VDDANA (only for VDDANA > 2.0V)
+            */
+            INTVCC1 = 0x2,
+
+            /*************************************************************
+             External reference
+            */
+            AREFA = 0x3,
+
+            /*************************************************************
+             External reference
+            */
+            AREFB = 0x4,
+        }
+
+        /*********************************************************************
+         Reference Selection
+        */
+        alias REFSEL = BitField!(3, 0, Mutability.rw, REFSELValues);
+
+        /*********************************************************************
+         Reference Buffer Offset Compensation Enable
+        */
+        alias REFCOMP = Bit!(7, Mutability.rw);
+    }
+
     /*************************************************************************
      Average Control
     */
@@ -85,40 +153,14 @@ final abstract class ADC : Peripheral!(0x42004000)
     }
 
     /*************************************************************************
-     Calibration
+     Sampling Time Control
     */
-    final abstract class CALIB : Register!(0x28)
+    final abstract class SAMPCTRL : Register!(0x3)
     {
         /*********************************************************************
-         Linearity Calibration Value
+         Sampling Time Length
         */
-        alias LINEARITY_CAL = BitField!(7, 0, Mutability.rw);
-
-        /*********************************************************************
-         Bias Calibration Value
-        */
-        alias BIAS_CAL = BitField!(10, 8, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Control A
-    */
-    final abstract class CTRLA : Register!(00)
-    {
-        /*********************************************************************
-         Software Reset
-        */
-        alias SWRST = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Enable
-        */
-        alias ENABLE = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Run in Standby
-        */
-        alias RUNSTDBY = Bit!(2, Mutability.rw);
+        alias SAMPLEN = BitField!(5, 0, Mutability.rw);
     }
 
     /*************************************************************************
@@ -230,51 +272,61 @@ final abstract class ADC : Peripheral!(0x42004000)
     }
 
     /*************************************************************************
-     Debug Control
+     Window Monitor Control
     */
-    final abstract class DBGCTRL : Register!(0x2a)
+    final abstract class WINCTRL : Register!(0x8)
     {
-        /*********************************************************************
-         Debug Run
+        /*****************************************************************
+         WINMODE's possible values
         */
-        alias DBGRUN = Bit!(0, Mutability.rw);
+        enum WINMODEValues
+        {
+            /*************************************************************
+             No window mode (default)
+            */
+            DISABLE = 0x0,
+
+            /*************************************************************
+             Mode 1: RESULT > WINLT
+            */
+            MODE1 = 0x1,
+
+            /*************************************************************
+             Mode 2: RESULT < WINUT
+            */
+            MODE2 = 0x2,
+
+            /*************************************************************
+             Mode 3: WINLT < RESULT < WINUT
+            */
+            MODE3 = 0x3,
+
+            /*************************************************************
+             Mode 4: !(WINLT < RESULT < WINUT)
+            */
+            MODE4 = 0x4,
+        }
+
+        /*********************************************************************
+         Window Monitor Mode
+        */
+        alias WINMODE = BitField!(2, 0, Mutability.rw, WINMODEValues);
     }
 
     /*************************************************************************
-     Event Control
+     Software Trigger
     */
-    final abstract class EVCTRL : Register!(0x14)
+    final abstract class SWTRIG : Register!(0xc)
     {
         /*********************************************************************
-         Start Conversion Event In
+         ADC Conversion Flush
         */
-        alias STARTEI = Bit!(0, Mutability.rw);
+        alias FLUSH = Bit!(0, Mutability.rw);
 
         /*********************************************************************
-         Synchronization Event In
+         ADC Start Conversion
         */
-        alias SYNCEI = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Result Ready Event Out
-        */
-        alias RESRDYEO = Bit!(4, Mutability.rw);
-
-        /*********************************************************************
-         Window Monitor Event Out
-        */
-        alias WINMONEO = Bit!(5, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Gain Correction
-    */
-    final abstract class GAINCORR : Register!(0x24)
-    {
-        /*********************************************************************
-         Gain Correction Value
-        */
-        alias GAINCORR = BitField!(11, 0, Mutability.rw);
+        alias START = Bit!(1, Mutability.rw);
     }
 
     /*************************************************************************
@@ -532,6 +584,32 @@ final abstract class ADC : Peripheral!(0x42004000)
     }
 
     /*************************************************************************
+     Event Control
+    */
+    final abstract class EVCTRL : Register!(0x14)
+    {
+        /*********************************************************************
+         Start Conversion Event In
+        */
+        alias STARTEI = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Synchronization Event In
+        */
+        alias SYNCEI = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Result Ready Event Out
+        */
+        alias RESRDYEO = Bit!(4, Mutability.rw);
+
+        /*********************************************************************
+         Window Monitor Event Out
+        */
+        alias WINMONEO = Bit!(5, Mutability.rw);
+    }
+
+    /*************************************************************************
      Interrupt Enable Clear
     */
     final abstract class INTENCLR : Register!(0x16)
@@ -610,86 +688,6 @@ final abstract class ADC : Peripheral!(0x42004000)
     }
 
     /*************************************************************************
-     Offset Correction
-    */
-    final abstract class OFFSETCORR : Register!(0x26)
-    {
-        /*********************************************************************
-         Offset Correction Value
-        */
-        alias OFFSETCORR = BitField!(11, 0, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Reference Control
-    */
-    final abstract class REFCTRL : Register!(0x1)
-    {
-        /*****************************************************************
-         REFSEL's possible values
-        */
-        enum REFSELValues
-        {
-            /*************************************************************
-             1.0V voltage reference
-            */
-            INT1V = 0x0,
-
-            /*************************************************************
-             1/1.48 VDDANA
-            */
-            INTVCC0 = 0x1,
-
-            /*************************************************************
-             1/2 VDDANA (only for VDDANA > 2.0V)
-            */
-            INTVCC1 = 0x2,
-
-            /*************************************************************
-             External reference
-            */
-            AREFA = 0x3,
-
-            /*************************************************************
-             External reference
-            */
-            AREFB = 0x4,
-        }
-
-        /*********************************************************************
-         Reference Selection
-        */
-        alias REFSEL = BitField!(3, 0, Mutability.rw, REFSELValues);
-
-        /*********************************************************************
-         Reference Buffer Offset Compensation Enable
-        */
-        alias REFCOMP = Bit!(7, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Result
-    */
-    final abstract class RESULT : Register!(0x1a)
-    {
-        /*********************************************************************
-         Result Conversion Value
-        */
-        alias RESULT = BitField!(15, 0, Mutability.r);
-    }
-
-    /*************************************************************************
-     Sampling Time Control
-    */
-    final abstract class SAMPCTRL : Register!(0x3)
-    {
-        /*********************************************************************
-         Sampling Time Length
-        */
-        alias SAMPLEN = BitField!(5, 0, Mutability.rw);
-    }
-
-    /*************************************************************************
      Status
     */
     final abstract class STATUS : Register!(0x19)
@@ -701,61 +699,14 @@ final abstract class ADC : Peripheral!(0x42004000)
     }
 
     /*************************************************************************
-     Software Trigger
+     Result
     */
-    final abstract class SWTRIG : Register!(0xc)
+    final abstract class RESULT : Register!(0x1a)
     {
         /*********************************************************************
-         ADC Conversion Flush
+         Result Conversion Value
         */
-        alias FLUSH = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         ADC Start Conversion
-        */
-        alias START = Bit!(1, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Window Monitor Control
-    */
-    final abstract class WINCTRL : Register!(0x8)
-    {
-        /*****************************************************************
-         WINMODE's possible values
-        */
-        enum WINMODEValues
-        {
-            /*************************************************************
-             No window mode (default)
-            */
-            DISABLE = 0x0,
-
-            /*************************************************************
-             Mode 1: RESULT > WINLT
-            */
-            MODE1 = 0x1,
-
-            /*************************************************************
-             Mode 2: RESULT < WINUT
-            */
-            MODE2 = 0x2,
-
-            /*************************************************************
-             Mode 3: WINLT < RESULT < WINUT
-            */
-            MODE3 = 0x3,
-
-            /*************************************************************
-             Mode 4: !(WINLT < RESULT < WINUT)
-            */
-            MODE4 = 0x4,
-        }
-
-        /*********************************************************************
-         Window Monitor Mode
-        */
-        alias WINMODE = BitField!(2, 0, Mutability.rw, WINMODEValues);
+        alias RESULT = BitField!(15, 0, Mutability.r);
     }
 
     /*************************************************************************
@@ -778,5 +729,54 @@ final abstract class ADC : Peripheral!(0x42004000)
          Window Upper Threshold
         */
         alias WINUT = BitField!(15, 0, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Gain Correction
+    */
+    final abstract class GAINCORR : Register!(0x24)
+    {
+        /*********************************************************************
+         Gain Correction Value
+        */
+        alias GAINCORR = BitField!(11, 0, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Offset Correction
+    */
+    final abstract class OFFSETCORR : Register!(0x26)
+    {
+        /*********************************************************************
+         Offset Correction Value
+        */
+        alias OFFSETCORR = BitField!(11, 0, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Calibration
+    */
+    final abstract class CALIB : Register!(0x28)
+    {
+        /*********************************************************************
+         Linearity Calibration Value
+        */
+        alias LINEARITY_CAL = BitField!(7, 0, Mutability.rw);
+
+        /*********************************************************************
+         Bias Calibration Value
+        */
+        alias BIAS_CAL = BitField!(10, 8, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Debug Control
+    */
+    final abstract class DBGCTRL : Register!(0x2a)
+    {
+        /*********************************************************************
+         Debug Run
+        */
+        alias DBGRUN = Bit!(0, Mutability.rw);
     }
 }

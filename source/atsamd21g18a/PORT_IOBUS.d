@@ -1,11 +1,11 @@
-module atsamd21g18a.port;
+module atsamd21g18a.port_iobus;
 
 import mvf.mmio;
 
 /*****************************************************************************
- Port Module
+ Port Module (IOBUS)
 */
-final abstract class PORT : Peripheral!(0x41004400)
+final abstract class PORT_IOBUS : Peripheral!(0x60000000)
 {
     /*************************************************************************
      Data Direction

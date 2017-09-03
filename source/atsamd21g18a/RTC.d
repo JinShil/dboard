@@ -1,6 +1,6 @@
 module atsamd21g18a.rtc;
 
-import mmio;
+import mvf.mmio;
 
 /*****************************************************************************
  Real-Time Counter
@@ -12,55 +12,6 @@ final abstract class RTC : Peripheral!(0x40001400)
     */
     final abstract class MODE0 : Peripheral!(0x40001400)
     {
-        /*************************************************************************
-         Debug Control
-        */
-        final abstract class DBGCTRL : Register!(0xb)
-        {
-            /*********************************************************************
-             Run During Debug
-            */
-            alias DBGRUN = Bit!(0, Mutability.rw);
-        }
-
-        /*************************************************************************
-         Frequency Correction
-        */
-        final abstract class FREQCORR : Register!(0xc)
-        {
-            /*********************************************************************
-             Correction Value
-            */
-            alias VALUE = BitField!(6, 0, Mutability.rw);
-
-            /*********************************************************************
-             Correction Sign
-            */
-            alias SIGN = Bit!(7, Mutability.rw);
-        }
-
-        /*************************************************************************
-         MODE0 Compare n Value
-        */
-        final abstract class COMP : Register!(0x18)
-        {
-            /*********************************************************************
-             Compare Value
-            */
-            alias COMP = BitField!(31, 0, Mutability.rw);
-        }
-
-        /*************************************************************************
-         MODE0 Counter Value
-        */
-        final abstract class COUNT : Register!(0x10)
-        {
-            /*********************************************************************
-             Counter Value
-            */
-            alias COUNT = BitField!(31, 0, Mutability.rw);
-        }
-
         /*************************************************************************
          MODE0 Control
         */
@@ -172,6 +123,27 @@ final abstract class RTC : Peripheral!(0x40001400)
              Prescaler
             */
             alias PRESCALER = BitField!(11, 8, Mutability.rw, PRESCALERValues);
+        }
+
+        /*************************************************************************
+         Read Request
+        */
+        final abstract class READREQ : Register!(0x2)
+        {
+            /*********************************************************************
+             Address
+            */
+            alias ADDR = BitField!(5, 0, Mutability.r);
+
+            /*********************************************************************
+             Read Continuously
+            */
+            alias RCONT = Bit!(14, Mutability.rw);
+
+            /*********************************************************************
+             Read Request
+            */
+            alias RREQ = Bit!(15, Mutability.w);
         }
 
         /*************************************************************************
@@ -294,27 +266,6 @@ final abstract class RTC : Peripheral!(0x40001400)
         }
 
         /*************************************************************************
-         Read Request
-        */
-        final abstract class READREQ : Register!(0x2)
-        {
-            /*********************************************************************
-             Address
-            */
-            alias ADDR = BitField!(5, 0, Mutability.r);
-
-            /*********************************************************************
-             Read Continuously
-            */
-            alias RCONT = Bit!(14, Mutability.rw);
-
-            /*********************************************************************
-             Read Request
-            */
-            alias RREQ = Bit!(15, Mutability.w);
-        }
-
-        /*************************************************************************
          Status
         */
         final abstract class STATUS : Register!(0xa)
@@ -324,12 +275,7 @@ final abstract class RTC : Peripheral!(0x40001400)
             */
             alias SYNCBUSY = Bit!(7, Mutability.r);
         }
-    }
-    /*****************************************************************************
-     16-bit Counter with Two 16-bit Compares
-    */
-    final abstract class MODE1 : Peripheral!(0x40001400)
-    {
+
         /*************************************************************************
          Debug Control
         */
@@ -358,37 +304,32 @@ final abstract class RTC : Peripheral!(0x40001400)
         }
 
         /*************************************************************************
-         MODE1 Compare n Value
-        */
-        final abstract class COMP1 : Register!(0x18)
-        {
-            /*********************************************************************
-             Compare Value
-            */
-            alias COMP = BitField!(15, 0, Mutability.rw);
-        }
-        /*************************************************************************
-         MODE1 Compare n Value
-        */
-        final abstract class COMP2 : Register!(0x1a)
-        {
-            /*********************************************************************
-             Compare Value
-            */
-            alias COMP = BitField!(15, 0, Mutability.rw);
-        }
-
-        /*************************************************************************
-         MODE1 Counter Value
+         MODE0 Counter Value
         */
         final abstract class COUNT : Register!(0x10)
         {
             /*********************************************************************
              Counter Value
             */
-            alias COUNT = BitField!(15, 0, Mutability.rw);
+            alias COUNT = BitField!(31, 0, Mutability.rw);
         }
 
+        /*************************************************************************
+         MODE0 Compare n Value
+        */
+        final abstract class COMP : Register!(0x18)
+        {
+            /*********************************************************************
+             Compare Value
+            */
+            alias COMP = BitField!(31, 0, Mutability.rw);
+        }
+    }
+    /*****************************************************************************
+     16-bit Counter with Two 16-bit Compares
+    */
+    final abstract class MODE1 : Peripheral!(0x40001400)
+    {
         /*************************************************************************
          MODE1 Control
         */
@@ -495,6 +436,27 @@ final abstract class RTC : Peripheral!(0x40001400)
              Prescaler
             */
             alias PRESCALER = BitField!(11, 8, Mutability.rw, PRESCALERValues);
+        }
+
+        /*************************************************************************
+         Read Request
+        */
+        final abstract class READREQ : Register!(0x2)
+        {
+            /*********************************************************************
+             Address
+            */
+            alias ADDR = BitField!(5, 0, Mutability.r);
+
+            /*********************************************************************
+             Read Continuously
+            */
+            alias RCONT = Bit!(14, Mutability.rw);
+
+            /*********************************************************************
+             Read Request
+            */
+            alias RREQ = Bit!(15, Mutability.w);
         }
 
         /*************************************************************************
@@ -637,38 +599,6 @@ final abstract class RTC : Peripheral!(0x40001400)
         }
 
         /*************************************************************************
-         MODE1 Counter Period
-        */
-        final abstract class PER : Register!(0x14)
-        {
-            /*********************************************************************
-             Counter Period
-            */
-            alias PER = BitField!(15, 0, Mutability.rw);
-        }
-
-        /*************************************************************************
-         Read Request
-        */
-        final abstract class READREQ : Register!(0x2)
-        {
-            /*********************************************************************
-             Address
-            */
-            alias ADDR = BitField!(5, 0, Mutability.r);
-
-            /*********************************************************************
-             Read Continuously
-            */
-            alias RCONT = Bit!(14, Mutability.rw);
-
-            /*********************************************************************
-             Read Request
-            */
-            alias RREQ = Bit!(15, Mutability.w);
-        }
-
-        /*************************************************************************
          Status
         */
         final abstract class STATUS : Register!(0xa)
@@ -678,12 +608,7 @@ final abstract class RTC : Peripheral!(0x40001400)
             */
             alias SYNCBUSY = Bit!(7, Mutability.r);
         }
-    }
-    /*****************************************************************************
-     Clock/Calendar with Alarm
-    */
-    final abstract class MODE2 : Peripheral!(0x40001400)
-    {
+
         /*************************************************************************
          Debug Control
         */
@@ -712,52 +637,53 @@ final abstract class RTC : Peripheral!(0x40001400)
         }
 
         /*************************************************************************
-         MODE2 Clock Value
+         MODE1 Counter Value
         */
-        final abstract class CLOCK : Register!(0x10)
+        final abstract class COUNT : Register!(0x10)
         {
             /*********************************************************************
-             Second
+             Counter Value
             */
-            alias SECOND = BitField!(5, 0, Mutability.rw);
-
-            /*********************************************************************
-             Minute
-            */
-            alias MINUTE = BitField!(11, 6, Mutability.rw);
-
-            /*****************************************************************
-             HOUR's possible values
-            */
-            enum HOURValues
-            {
-                /*************************************************************
-                 Afternoon Hour
-                */
-                PM = 0x10,
-            }
-
-            /*********************************************************************
-             Hour
-            */
-            alias HOUR = BitField!(16, 12, Mutability.rw, HOURValues);
-
-            /*********************************************************************
-             Day
-            */
-            alias DAY = BitField!(21, 17, Mutability.rw);
-
-            /*********************************************************************
-             Month
-            */
-            alias MONTH = BitField!(25, 22, Mutability.rw);
-
-            /*********************************************************************
-             Year
-            */
-            alias YEAR = BitField!(31, 26, Mutability.rw);
+            alias COUNT = BitField!(15, 0, Mutability.rw);
         }
 
+        /*************************************************************************
+         MODE1 Counter Period
+        */
+        final abstract class PER : Register!(0x14)
+        {
+            /*********************************************************************
+             Counter Period
+            */
+            alias PER = BitField!(15, 0, Mutability.rw);
+        }
+
+        /*************************************************************************
+         MODE1 Compare n Value
+        */
+        final abstract class COMP1 : Register!(0x18)
+        {
+            /*********************************************************************
+             Compare Value
+            */
+            alias COMP = BitField!(15, 0, Mutability.rw);
+        }
+        /*************************************************************************
+         MODE1 Compare n Value
+        */
+        final abstract class COMP2 : Register!(0x1a)
+        {
+            /*********************************************************************
+             Compare Value
+            */
+            alias COMP = BitField!(15, 0, Mutability.rw);
+        }
+    }
+    /*****************************************************************************
+     Clock/Calendar with Alarm
+    */
+    final abstract class MODE2 : Peripheral!(0x40001400)
+    {
         /*************************************************************************
          MODE2 Control
         */
@@ -874,6 +800,27 @@ final abstract class RTC : Peripheral!(0x40001400)
              Prescaler
             */
             alias PRESCALER = BitField!(11, 8, Mutability.rw, PRESCALERValues);
+        }
+
+        /*************************************************************************
+         Read Request
+        */
+        final abstract class READREQ : Register!(0x2)
+        {
+            /*********************************************************************
+             Address
+            */
+            alias ADDR = BitField!(5, 0, Mutability.r);
+
+            /*********************************************************************
+             Read Continuously
+            */
+            alias RCONT = Bit!(14, Mutability.rw);
+
+            /*********************************************************************
+             Read Request
+            */
+            alias RREQ = Bit!(15, Mutability.w);
         }
 
         /*************************************************************************
@@ -996,6 +943,96 @@ final abstract class RTC : Peripheral!(0x40001400)
         }
 
         /*************************************************************************
+         Status
+        */
+        final abstract class STATUS : Register!(0xa)
+        {
+            /*********************************************************************
+             Synchronization Busy
+            */
+            alias SYNCBUSY = Bit!(7, Mutability.r);
+        }
+
+        /*************************************************************************
+         Debug Control
+        */
+        final abstract class DBGCTRL : Register!(0xb)
+        {
+            /*********************************************************************
+             Run During Debug
+            */
+            alias DBGRUN = Bit!(0, Mutability.rw);
+        }
+
+        /*************************************************************************
+         Frequency Correction
+        */
+        final abstract class FREQCORR : Register!(0xc)
+        {
+            /*********************************************************************
+             Correction Value
+            */
+            alias VALUE = BitField!(6, 0, Mutability.rw);
+
+            /*********************************************************************
+             Correction Sign
+            */
+            alias SIGN = Bit!(7, Mutability.rw);
+        }
+
+        /*************************************************************************
+         MODE2 Clock Value
+        */
+        final abstract class CLOCK : Register!(0x10)
+        {
+            /*********************************************************************
+             Second
+            */
+            alias SECOND = BitField!(5, 0, Mutability.rw);
+
+            /*********************************************************************
+             Minute
+            */
+            alias MINUTE = BitField!(11, 6, Mutability.rw);
+
+            /*****************************************************************
+             HOUR's possible values
+            */
+            enum HOURValues
+            {
+                /*************************************************************
+                 AM when CLKREP in 12-hour
+                */
+                AM = 0x0,
+
+                /*************************************************************
+                 PM when CLKREP in 12-hour
+                */
+                PM = 0x10,
+            }
+
+            /*********************************************************************
+             Hour
+            */
+            alias HOUR = BitField!(16, 12, Mutability.rw, HOURValues);
+
+            /*********************************************************************
+             Day
+            */
+            alias DAY = BitField!(21, 17, Mutability.rw);
+
+            /*********************************************************************
+             Month
+            */
+            alias MONTH = BitField!(25, 22, Mutability.rw);
+
+            /*********************************************************************
+             Year
+            */
+            alias YEAR = BitField!(31, 26, Mutability.rw);
+        }
+
+        /*************************************************************************
          MODE2 Alarm n Value
         */
         final abstract class ALARM : Register!(0x18)
@@ -1010,10 +1047,26 @@ final abstract class RTC : Peripheral!(0x40001400)
             */
             alias MINUTE = BitField!(11, 6, Mutability.rw);
 
+            /*****************************************************************
+             HOUR's possible values
+            */
+            enum HOURValues
+            {
+                /*************************************************************
+                 Morning hour
+                */
+                AM = 0x0,
+
+                /*************************************************************
+                 Afternoon hour
+                */
+                PM = 0x10,
+            }
+
             /*********************************************************************
              Hour
             */
-            alias HOUR = BitField!(16, 12, Mutability.rw);
+            alias HOUR = BitField!(16, 12, Mutability.rw, HOURValues);
 
             /*********************************************************************
              Day
@@ -1081,38 +1134,6 @@ final abstract class RTC : Peripheral!(0x40001400)
              Alarm Mask Selection
             */
             alias SEL = BitField!(2, 0, Mutability.rw, SELValues);
-        }
-
-        /*************************************************************************
-         Read Request
-        */
-        final abstract class READREQ : Register!(0x2)
-        {
-            /*********************************************************************
-             Address
-            */
-            alias ADDR = BitField!(5, 0, Mutability.r);
-
-            /*********************************************************************
-             Read Continuously
-            */
-            alias RCONT = Bit!(14, Mutability.rw);
-
-            /*********************************************************************
-             Read Request
-            */
-            alias RREQ = Bit!(15, Mutability.w);
-        }
-
-        /*************************************************************************
-         Status
-        */
-        final abstract class STATUS : Register!(0xa)
-        {
-            /*********************************************************************
-             Synchronization Busy
-            */
-            alias SYNCBUSY = Bit!(7, Mutability.r);
         }
     }
 }

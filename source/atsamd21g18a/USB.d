@@ -1,6 +1,6 @@
 module atsamd21g18a.usb;
 
-import mmio;
+import mvf.mmio;
 
 /*****************************************************************************
  Universal Serial Bus
@@ -55,14 +55,87 @@ final abstract class USB : Peripheral!(0x41005000)
         }
 
         /*************************************************************************
-         Descriptor Address
+         Synchronization Busy
         */
-        final abstract class DESCADD : Register!(0x24)
+        final abstract class SYNCBUSY : Register!(0x2)
         {
             /*********************************************************************
-             Descriptor Address Value
+             Software Reset Synchronization Busy
             */
-            alias DESCADD = BitField!(31, 0, Mutability.rw);
+            alias SWRST = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Enable Synchronization Busy
+            */
+            alias ENABLE = Bit!(1, Mutability.r);
+        }
+
+        /*************************************************************************
+         USB Quality Of Service
+        */
+        final abstract class QOSCTRL : Register!(0x3)
+        {
+            /*****************************************************************
+             CQOS's possible values
+            */
+            enum CQOSValues
+            {
+                /*************************************************************
+                 Background (no sensitive operation)
+                */
+                DISABLE = 0x0,
+
+                /*************************************************************
+                 Sensitive Bandwidth
+                */
+                LOW = 0x1,
+
+                /*************************************************************
+                 Sensitive Latency
+                */
+                MEDIUM = 0x2,
+
+                /*************************************************************
+                 Critical Latency
+                */
+                HIGH = 0x3,
+            }
+
+            /*********************************************************************
+             Configuration Quality of Service
+            */
+            alias CQOS = BitField!(1, 0, Mutability.rw, CQOSValues);
+
+            /*****************************************************************
+             DQOS's possible values
+            */
+            enum DQOSValues
+            {
+                /*************************************************************
+                 Background (no sensitive operation)
+                */
+                DISABLE = 0x0,
+
+                /*************************************************************
+                 Sensitive Bandwidth
+                */
+                LOW = 0x1,
+
+                /*************************************************************
+                 Sensitive Latency
+                */
+                MEDIUM = 0x2,
+
+                /*************************************************************
+                 Critical Latency
+                */
+                HIGH = 0x3,
+            }
+
+            /*********************************************************************
+             Data Quality of Service
+            */
+            alias DQOS = BitField!(3, 2, Mutability.rw, DQOSValues);
         }
 
         /*************************************************************************
@@ -88,22 +161,22 @@ final abstract class USB : Peripheral!(0x41005000)
                 /*************************************************************
                  FS : Full Speed
                 */
-                _0x0 = 0x0,
+                FS = 0x0,
 
                 /*************************************************************
                  LS : Low Speed
                 */
-                _0x1 = 0x1,
+                LS = 0x1,
 
                 /*************************************************************
                  HS : High Speed capable
                 */
-                _0x2 = 0x2,
+                HS = 0x2,
 
                 /*************************************************************
                  HSTM: High Speed Test Mode (force high-speed mode for test mode)
                 */
-                _0x3 = 0x3,
+                HSTM = 0x3,
             }
 
             /*********************************************************************
@@ -190,49 +263,113 @@ final abstract class USB : Peripheral!(0x41005000)
         }
 
         /*************************************************************************
-         DEVICE End Point Interrupt Summary
+         DEVICE Status
         */
-        final abstract class EPINTSMRY : Register!(0x20)
+        final abstract class STATUS : Register!(0xc)
         {
-            /*********************************************************************
-             End Point 0 Interrupt
+            /*****************************************************************
+             SPEED's possible values
             */
-            alias EPINT0 = Bit!(0, Mutability.r);
+            enum SPEEDValues
+            {
+                /*************************************************************
+                 Full-speed mode
+                */
+                FS = 0x0,
+
+                /*************************************************************
+                 High-speed mode
+                */
+                HS = 0x1,
+
+                /*************************************************************
+                 Low-speed mode
+                */
+                LS = 0x2,
+            }
 
             /*********************************************************************
-             End Point 1 Interrupt
+             Speed Status
             */
-            alias EPINT1 = Bit!(1, Mutability.r);
+            alias SPEED = BitField!(3, 2, Mutability.r, SPEEDValues);
+
+            /*****************************************************************
+             LINESTATE's possible values
+            */
+            enum LINESTATEValues
+            {
+                /*************************************************************
+                 SE0/RESET
+                */
+                _0 = 0x0,
+
+                /*************************************************************
+                 FS-J or LS-K State
+                */
+                _1 = 0x1,
+
+                /*************************************************************
+                 FS-K or LS-J State
+                */
+                _2 = 0x2,
+            }
 
             /*********************************************************************
-             End Point 2 Interrupt
+             USB Line State Status
             */
-            alias EPINT2 = Bit!(2, Mutability.r);
+            alias LINESTATE = BitField!(7, 6, Mutability.r, LINESTATEValues);
+        }
+
+        /*************************************************************************
+         Finite State Machine Status
+        */
+        final abstract class FSMSTATUS : Register!(0xd)
+        {
+            /*****************************************************************
+             FSMSTATE's possible values
+            */
+            enum FSMSTATEValues
+            {
+                /*************************************************************
+                 OFF (L3). It corresponds to the powered-off, disconnected, and disabled state
+                */
+                OFF = 0x1,
+
+                /*************************************************************
+                 ON (L0). It corresponds to the Idle and Active states
+                */
+                ON = 0x2,
+
+                /*************************************************************
+                 SUSPEND (L2)
+                */
+                SUSPEND = 0x4,
+
+                /*************************************************************
+                 SLEEP (L1)
+                */
+                SLEEP = 0x8,
+
+                /*************************************************************
+                 DNRESUME. Down Stream Resume.
+                */
+                DNRESUME = 0x10,
+
+                /*************************************************************
+                 UPRESUME. Up Stream Resume.
+                */
+                UPRESUME = 0x20,
+
+                /*************************************************************
+                 RESET. USB lines Reset.
+                */
+                RESET = 0x40,
+            }
 
             /*********************************************************************
-             End Point 3 Interrupt
+             Fine State Machine Status
             */
-            alias EPINT3 = Bit!(3, Mutability.r);
-
-            /*********************************************************************
-             End Point 4 Interrupt
-            */
-            alias EPINT4 = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             End Point 5 Interrupt
-            */
-            alias EPINT5 = Bit!(5, Mutability.r);
-
-            /*********************************************************************
-             End Point 6 Interrupt
-            */
-            alias EPINT6 = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             End Point 7 Interrupt
-            */
-            alias EPINT7 = Bit!(7, Mutability.r);
+            alias FSMSTATE = BitField!(6, 0, Mutability.r, FSMSTATEValues);
         }
 
         /*************************************************************************
@@ -425,61 +562,81 @@ final abstract class USB : Peripheral!(0x41005000)
         }
 
         /*************************************************************************
-         DEVICE Status
+         DEVICE End Point Interrupt Summary
         */
-        final abstract class STATUS : Register!(0xc)
+        final abstract class EPINTSMRY : Register!(0x20)
         {
-            /*****************************************************************
-             SPEED's possible values
+            /*********************************************************************
+             End Point 0 Interrupt
             */
-            enum SPEEDValues
-            {
-                /*************************************************************
-                 Full-speed mode
-                */
-                _0x0 = 0x0,
-
-                /*************************************************************
-                 High-speed mode
-                */
-                _0x1 = 0x1,
-
-                /*************************************************************
-                 Low-speed mode
-                */
-                _0x2 = 0x2,
-            }
+            alias EPINT0 = Bit!(0, Mutability.r);
 
             /*********************************************************************
-             Speed Status
+             End Point 1 Interrupt
             */
-            alias SPEED = BitField!(3, 2, Mutability.r, SPEEDValues);
-
-            /*****************************************************************
-             LINESTATE's possible values
-            */
-            enum LINESTATEValues
-            {
-                /*************************************************************
-                 SE0/RESET
-                */
-                _0x0 = 0x0,
-
-                /*************************************************************
-                 FS-J or LS-K State
-                */
-                _0x1 = 0x1,
-
-                /*************************************************************
-                 FS-K or LS-J State
-                */
-                _0x2 = 0x2,
-            }
+            alias EPINT1 = Bit!(1, Mutability.r);
 
             /*********************************************************************
-             USB Line State Status
+             End Point 2 Interrupt
             */
-            alias LINESTATE = BitField!(7, 6, Mutability.r, LINESTATEValues);
+            alias EPINT2 = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             End Point 3 Interrupt
+            */
+            alias EPINT3 = Bit!(3, Mutability.r);
+
+            /*********************************************************************
+             End Point 4 Interrupt
+            */
+            alias EPINT4 = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             End Point 5 Interrupt
+            */
+            alias EPINT5 = Bit!(5, Mutability.r);
+
+            /*********************************************************************
+             End Point 6 Interrupt
+            */
+            alias EPINT6 = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             End Point 7 Interrupt
+            */
+            alias EPINT7 = Bit!(7, Mutability.r);
+        }
+
+        /*************************************************************************
+         Descriptor Address
+        */
+        final abstract class DESCADD : Register!(0x24)
+        {
+            /*********************************************************************
+             Descriptor Address Value
+            */
+            alias DESCADD = BitField!(31, 0, Mutability.rw);
+        }
+
+        /*************************************************************************
+         USB PAD Calibration
+        */
+        final abstract class PADCAL : Register!(0x28)
+        {
+            /*********************************************************************
+             USB Pad Transp calibration
+            */
+            alias TRANSP = BitField!(4, 0, Mutability.rw);
+
+            /*********************************************************************
+             USB Pad Transn calibration
+            */
+            alias TRANSN = BitField!(10, 6, Mutability.rw);
+
+            /*********************************************************************
+             USB Pad Trim calibration
+            */
+            alias TRIM = BitField!(14, 12, Mutability.rw);
         }
 
         /*************************************************************************
@@ -641,1290 +798,6 @@ final abstract class USB : Peripheral!(0x41005000)
              NYET Token Disable
             */
             alias NYETDIS = Bit!(7, Mutability.rw);
-        }
-
-        /*************************************************************************
-         DEVICE End Point Interrupt Clear Flag
-        */
-        final abstract class EPINTENCLR1 : Register!(0x108)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Disable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Disable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Disable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Disable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Disable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/Out Interrupt Disable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/Out Interrupt Disable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Clear Flag
-        */
-        final abstract class EPINTENCLR2 : Register!(0x128)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Disable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Disable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Disable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Disable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Disable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/Out Interrupt Disable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/Out Interrupt Disable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Clear Flag
-        */
-        final abstract class EPINTENCLR3 : Register!(0x148)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Disable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Disable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Disable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Disable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Disable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/Out Interrupt Disable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/Out Interrupt Disable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Clear Flag
-        */
-        final abstract class EPINTENCLR4 : Register!(0x168)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Disable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Disable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Disable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Disable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Disable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/Out Interrupt Disable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/Out Interrupt Disable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Clear Flag
-        */
-        final abstract class EPINTENCLR5 : Register!(0x188)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Disable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Disable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Disable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Disable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Disable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/Out Interrupt Disable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/Out Interrupt Disable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Clear Flag
-        */
-        final abstract class EPINTENCLR6 : Register!(0x1a8)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Disable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Disable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Disable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Disable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Disable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/Out Interrupt Disable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/Out Interrupt Disable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Clear Flag
-        */
-        final abstract class EPINTENCLR7 : Register!(0x1c8)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Disable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Disable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Disable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Disable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Disable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/Out Interrupt Disable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/Out Interrupt Disable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Clear Flag
-        */
-        final abstract class EPINTENCLR8 : Register!(0x1e8)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Disable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Disable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Disable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Disable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Disable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/Out Interrupt Disable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/Out Interrupt Disable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-
-        /*************************************************************************
-         DEVICE End Point Interrupt Set Flag
-        */
-        final abstract class EPINTENSET1 : Register!(0x109)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Enable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Enable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Enable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Enable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Enable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out Interrupt enable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out Interrupt enable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Set Flag
-        */
-        final abstract class EPINTENSET2 : Register!(0x129)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Enable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Enable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Enable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Enable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Enable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out Interrupt enable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out Interrupt enable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Set Flag
-        */
-        final abstract class EPINTENSET3 : Register!(0x149)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Enable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Enable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Enable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Enable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Enable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out Interrupt enable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out Interrupt enable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Set Flag
-        */
-        final abstract class EPINTENSET4 : Register!(0x169)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Enable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Enable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Enable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Enable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Enable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out Interrupt enable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out Interrupt enable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Set Flag
-        */
-        final abstract class EPINTENSET5 : Register!(0x189)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Enable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Enable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Enable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Enable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Enable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out Interrupt enable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out Interrupt enable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Set Flag
-        */
-        final abstract class EPINTENSET6 : Register!(0x1a9)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Enable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Enable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Enable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Enable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Enable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out Interrupt enable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out Interrupt enable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Set Flag
-        */
-        final abstract class EPINTENSET7 : Register!(0x1c9)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Enable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Enable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Enable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Enable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Enable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out Interrupt enable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out Interrupt enable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Set Flag
-        */
-        final abstract class EPINTENSET8 : Register!(0x1e9)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Enable
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Enable
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0 Interrupt Enable
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1 Interrupt Enable
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup Interrupt Enable
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out Interrupt enable
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out Interrupt enable
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-
-        /*************************************************************************
-         DEVICE End Point Interrupt Flag
-        */
-        final abstract class EPINTFLAG1 : Register!(0x107)
-        {
-            /*********************************************************************
-             Transfer Complete 0
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Flag
-        */
-        final abstract class EPINTFLAG2 : Register!(0x127)
-        {
-            /*********************************************************************
-             Transfer Complete 0
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Flag
-        */
-        final abstract class EPINTFLAG3 : Register!(0x147)
-        {
-            /*********************************************************************
-             Transfer Complete 0
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Flag
-        */
-        final abstract class EPINTFLAG4 : Register!(0x167)
-        {
-            /*********************************************************************
-             Transfer Complete 0
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Flag
-        */
-        final abstract class EPINTFLAG5 : Register!(0x187)
-        {
-            /*********************************************************************
-             Transfer Complete 0
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Flag
-        */
-        final abstract class EPINTFLAG6 : Register!(0x1a7)
-        {
-            /*********************************************************************
-             Transfer Complete 0
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Flag
-        */
-        final abstract class EPINTFLAG7 : Register!(0x1c7)
-        {
-            /*********************************************************************
-             Transfer Complete 0
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-        /*************************************************************************
-         DEVICE End Point Interrupt Flag
-        */
-        final abstract class EPINTFLAG8 : Register!(0x1e7)
-        {
-            /*********************************************************************
-             Transfer Complete 0
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 0
-            */
-            alias TRFAIL0 = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow 1
-            */
-            alias TRFAIL1 = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Received Setup
-            */
-            alias RXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall 0 In/out
-            */
-            alias STALL0 = Bit!(5, Mutability.rw);
-
-            /*********************************************************************
-             Stall 1 In/out
-            */
-            alias STALL1 = Bit!(6, Mutability.rw);
-        }
-
-        /*************************************************************************
-         DEVICE End Point Pipe Status
-        */
-        final abstract class EPSTATUS1 : Register!(0x106)
-        {
-            /*********************************************************************
-             Data Toggle Out
-            */
-            alias DTGLOUT = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Data Toggle In
-            */
-            alias DTGLIN = Bit!(1, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Stall 0 Request
-            */
-            alias STALLRQ0 = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Stall 1 Request
-            */
-            alias STALLRQ1 = Bit!(5, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-        /*************************************************************************
-         DEVICE End Point Pipe Status
-        */
-        final abstract class EPSTATUS2 : Register!(0x126)
-        {
-            /*********************************************************************
-             Data Toggle Out
-            */
-            alias DTGLOUT = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Data Toggle In
-            */
-            alias DTGLIN = Bit!(1, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Stall 0 Request
-            */
-            alias STALLRQ0 = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Stall 1 Request
-            */
-            alias STALLRQ1 = Bit!(5, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-        /*************************************************************************
-         DEVICE End Point Pipe Status
-        */
-        final abstract class EPSTATUS3 : Register!(0x146)
-        {
-            /*********************************************************************
-             Data Toggle Out
-            */
-            alias DTGLOUT = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Data Toggle In
-            */
-            alias DTGLIN = Bit!(1, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Stall 0 Request
-            */
-            alias STALLRQ0 = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Stall 1 Request
-            */
-            alias STALLRQ1 = Bit!(5, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-        /*************************************************************************
-         DEVICE End Point Pipe Status
-        */
-        final abstract class EPSTATUS4 : Register!(0x166)
-        {
-            /*********************************************************************
-             Data Toggle Out
-            */
-            alias DTGLOUT = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Data Toggle In
-            */
-            alias DTGLIN = Bit!(1, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Stall 0 Request
-            */
-            alias STALLRQ0 = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Stall 1 Request
-            */
-            alias STALLRQ1 = Bit!(5, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-        /*************************************************************************
-         DEVICE End Point Pipe Status
-        */
-        final abstract class EPSTATUS5 : Register!(0x186)
-        {
-            /*********************************************************************
-             Data Toggle Out
-            */
-            alias DTGLOUT = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Data Toggle In
-            */
-            alias DTGLIN = Bit!(1, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Stall 0 Request
-            */
-            alias STALLRQ0 = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Stall 1 Request
-            */
-            alias STALLRQ1 = Bit!(5, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-        /*************************************************************************
-         DEVICE End Point Pipe Status
-        */
-        final abstract class EPSTATUS6 : Register!(0x1a6)
-        {
-            /*********************************************************************
-             Data Toggle Out
-            */
-            alias DTGLOUT = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Data Toggle In
-            */
-            alias DTGLIN = Bit!(1, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Stall 0 Request
-            */
-            alias STALLRQ0 = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Stall 1 Request
-            */
-            alias STALLRQ1 = Bit!(5, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-        /*************************************************************************
-         DEVICE End Point Pipe Status
-        */
-        final abstract class EPSTATUS7 : Register!(0x1c6)
-        {
-            /*********************************************************************
-             Data Toggle Out
-            */
-            alias DTGLOUT = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Data Toggle In
-            */
-            alias DTGLIN = Bit!(1, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Stall 0 Request
-            */
-            alias STALLRQ0 = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Stall 1 Request
-            */
-            alias STALLRQ1 = Bit!(5, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-        /*************************************************************************
-         DEVICE End Point Pipe Status
-        */
-        final abstract class EPSTATUS8 : Register!(0x1e6)
-        {
-            /*********************************************************************
-             Data Toggle Out
-            */
-            alias DTGLOUT = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Data Toggle In
-            */
-            alias DTGLIN = Bit!(1, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Stall 0 Request
-            */
-            alias STALLRQ0 = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Stall 1 Request
-            */
-            alias STALLRQ1 = Bit!(5, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
         }
 
         /*************************************************************************
@@ -2570,92 +1443,1287 @@ final abstract class USB : Peripheral!(0x41005000)
         }
 
         /*************************************************************************
-         Finite State Machine Status
+         DEVICE End Point Pipe Status
         */
-        final abstract class FSMSTATUS : Register!(0xd)
+        final abstract class EPSTATUS1 : Register!(0x106)
         {
-            /*****************************************************************
-             FSMSTATE's possible values
+            /*********************************************************************
+             Data Toggle Out
             */
-            enum FSMSTATEValues
-            {
-                /*************************************************************
-                 OFF (L3). It corresponds to the powered-off, disconnected, and disabled state
-                */
-                _0x1 = 0x1,
-
-                /*************************************************************
-                 ON (L0). It corresponds to the Idle and Active states
-                */
-                _0x2 = 0x2,
-
-                /*************************************************************
-                 SUSPEND (L2)
-                */
-                _0x4 = 0x4,
-
-                /*************************************************************
-                 SLEEP (L1)
-                */
-                _0x8 = 0x8,
-
-                /*************************************************************
-                 DNRESUME. Down Stream Resume.
-                */
-                _0x10 = 0x10,
-
-                /*************************************************************
-                 UPRESUME. Up Stream Resume.
-                */
-                _0x20 = 0x20,
-
-                /*************************************************************
-                 RESET. USB lines Reset.
-                */
-                _0x40 = 0x40,
-            }
+            alias DTGLOUT = Bit!(0, Mutability.r);
 
             /*********************************************************************
-             Fine State Machine Status
+             Data Toggle In
             */
-            alias FSMSTATE = BitField!(5, 0, Mutability.r, FSMSTATEValues);
+            alias DTGLIN = Bit!(1, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Stall 0 Request
+            */
+            alias STALLRQ0 = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Stall 1 Request
+            */
+            alias STALLRQ1 = Bit!(5, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+        /*************************************************************************
+         DEVICE End Point Pipe Status
+        */
+        final abstract class EPSTATUS2 : Register!(0x126)
+        {
+            /*********************************************************************
+             Data Toggle Out
+            */
+            alias DTGLOUT = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Data Toggle In
+            */
+            alias DTGLIN = Bit!(1, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Stall 0 Request
+            */
+            alias STALLRQ0 = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Stall 1 Request
+            */
+            alias STALLRQ1 = Bit!(5, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+        /*************************************************************************
+         DEVICE End Point Pipe Status
+        */
+        final abstract class EPSTATUS3 : Register!(0x146)
+        {
+            /*********************************************************************
+             Data Toggle Out
+            */
+            alias DTGLOUT = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Data Toggle In
+            */
+            alias DTGLIN = Bit!(1, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Stall 0 Request
+            */
+            alias STALLRQ0 = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Stall 1 Request
+            */
+            alias STALLRQ1 = Bit!(5, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+        /*************************************************************************
+         DEVICE End Point Pipe Status
+        */
+        final abstract class EPSTATUS4 : Register!(0x166)
+        {
+            /*********************************************************************
+             Data Toggle Out
+            */
+            alias DTGLOUT = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Data Toggle In
+            */
+            alias DTGLIN = Bit!(1, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Stall 0 Request
+            */
+            alias STALLRQ0 = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Stall 1 Request
+            */
+            alias STALLRQ1 = Bit!(5, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+        /*************************************************************************
+         DEVICE End Point Pipe Status
+        */
+        final abstract class EPSTATUS5 : Register!(0x186)
+        {
+            /*********************************************************************
+             Data Toggle Out
+            */
+            alias DTGLOUT = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Data Toggle In
+            */
+            alias DTGLIN = Bit!(1, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Stall 0 Request
+            */
+            alias STALLRQ0 = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Stall 1 Request
+            */
+            alias STALLRQ1 = Bit!(5, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+        /*************************************************************************
+         DEVICE End Point Pipe Status
+        */
+        final abstract class EPSTATUS6 : Register!(0x1a6)
+        {
+            /*********************************************************************
+             Data Toggle Out
+            */
+            alias DTGLOUT = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Data Toggle In
+            */
+            alias DTGLIN = Bit!(1, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Stall 0 Request
+            */
+            alias STALLRQ0 = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Stall 1 Request
+            */
+            alias STALLRQ1 = Bit!(5, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+        /*************************************************************************
+         DEVICE End Point Pipe Status
+        */
+        final abstract class EPSTATUS7 : Register!(0x1c6)
+        {
+            /*********************************************************************
+             Data Toggle Out
+            */
+            alias DTGLOUT = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Data Toggle In
+            */
+            alias DTGLIN = Bit!(1, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Stall 0 Request
+            */
+            alias STALLRQ0 = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Stall 1 Request
+            */
+            alias STALLRQ1 = Bit!(5, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+        /*************************************************************************
+         DEVICE End Point Pipe Status
+        */
+        final abstract class EPSTATUS8 : Register!(0x1e6)
+        {
+            /*********************************************************************
+             Data Toggle Out
+            */
+            alias DTGLOUT = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Data Toggle In
+            */
+            alias DTGLIN = Bit!(1, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Stall 0 Request
+            */
+            alias STALLRQ0 = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Stall 1 Request
+            */
+            alias STALLRQ1 = Bit!(5, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
         }
 
         /*************************************************************************
-         USB PAD Calibration
+         DEVICE End Point Interrupt Flag
         */
-        final abstract class PADCAL : Register!(0x28)
+        final abstract class EPINTFLAG1 : Register!(0x107)
         {
             /*********************************************************************
-             USB Pad Transp calibration
+             Transfer Complete 0
             */
-            alias TRANSP = BitField!(4, 0, Mutability.rw);
+            alias TRCPT0 = Bit!(0, Mutability.rw);
 
             /*********************************************************************
-             USB Pad Transn calibration
+             Transfer Complete 1
             */
-            alias TRANSN = BitField!(10, 6, Mutability.rw);
+            alias TRCPT1 = Bit!(1, Mutability.rw);
 
             /*********************************************************************
-             USB Pad Trim calibration
+             Error Flow 0
             */
-            alias TRIM = BitField!(14, 12, Mutability.rw);
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Flag
+        */
+        final abstract class EPINTFLAG2 : Register!(0x127)
+        {
+            /*********************************************************************
+             Transfer Complete 0
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Flag
+        */
+        final abstract class EPINTFLAG3 : Register!(0x147)
+        {
+            /*********************************************************************
+             Transfer Complete 0
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Flag
+        */
+        final abstract class EPINTFLAG4 : Register!(0x167)
+        {
+            /*********************************************************************
+             Transfer Complete 0
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Flag
+        */
+        final abstract class EPINTFLAG5 : Register!(0x187)
+        {
+            /*********************************************************************
+             Transfer Complete 0
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Flag
+        */
+        final abstract class EPINTFLAG6 : Register!(0x1a7)
+        {
+            /*********************************************************************
+             Transfer Complete 0
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Flag
+        */
+        final abstract class EPINTFLAG7 : Register!(0x1c7)
+        {
+            /*********************************************************************
+             Transfer Complete 0
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Flag
+        */
+        final abstract class EPINTFLAG8 : Register!(0x1e7)
+        {
+            /*********************************************************************
+             Transfer Complete 0
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
         }
 
         /*************************************************************************
-         Synchronization Busy
+         DEVICE End Point Interrupt Clear Flag
         */
-        final abstract class SYNCBUSY : Register!(0x2)
+        final abstract class EPINTENCLR1 : Register!(0x108)
         {
             /*********************************************************************
-             Software Reset Synchronization Busy
+             Transfer Complete 0 Interrupt Disable
             */
-            alias SWRST = Bit!(0, Mutability.r);
+            alias TRCPT0 = Bit!(0, Mutability.rw);
 
             /*********************************************************************
-             Enable Synchronization Busy
+             Transfer Complete 1 Interrupt Disable
             */
-            alias ENABLE = Bit!(1, Mutability.r);
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Disable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Disable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Disable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/Out Interrupt Disable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/Out Interrupt Disable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Clear Flag
+        */
+        final abstract class EPINTENCLR2 : Register!(0x128)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Disable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Disable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Disable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Disable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Disable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/Out Interrupt Disable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/Out Interrupt Disable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Clear Flag
+        */
+        final abstract class EPINTENCLR3 : Register!(0x148)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Disable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Disable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Disable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Disable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Disable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/Out Interrupt Disable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/Out Interrupt Disable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Clear Flag
+        */
+        final abstract class EPINTENCLR4 : Register!(0x168)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Disable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Disable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Disable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Disable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Disable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/Out Interrupt Disable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/Out Interrupt Disable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Clear Flag
+        */
+        final abstract class EPINTENCLR5 : Register!(0x188)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Disable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Disable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Disable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Disable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Disable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/Out Interrupt Disable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/Out Interrupt Disable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Clear Flag
+        */
+        final abstract class EPINTENCLR6 : Register!(0x1a8)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Disable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Disable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Disable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Disable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Disable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/Out Interrupt Disable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/Out Interrupt Disable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Clear Flag
+        */
+        final abstract class EPINTENCLR7 : Register!(0x1c8)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Disable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Disable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Disable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Disable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Disable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/Out Interrupt Disable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/Out Interrupt Disable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Clear Flag
+        */
+        final abstract class EPINTENCLR8 : Register!(0x1e8)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Disable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Disable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Disable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Disable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Disable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/Out Interrupt Disable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/Out Interrupt Disable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+
+        /*************************************************************************
+         DEVICE End Point Interrupt Set Flag
+        */
+        final abstract class EPINTENSET1 : Register!(0x109)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Enable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Enable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Enable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Enable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Enable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out Interrupt enable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out Interrupt enable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Set Flag
+        */
+        final abstract class EPINTENSET2 : Register!(0x129)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Enable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Enable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Enable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Enable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Enable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out Interrupt enable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out Interrupt enable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Set Flag
+        */
+        final abstract class EPINTENSET3 : Register!(0x149)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Enable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Enable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Enable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Enable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Enable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out Interrupt enable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out Interrupt enable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Set Flag
+        */
+        final abstract class EPINTENSET4 : Register!(0x169)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Enable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Enable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Enable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Enable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Enable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out Interrupt enable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out Interrupt enable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Set Flag
+        */
+        final abstract class EPINTENSET5 : Register!(0x189)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Enable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Enable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Enable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Enable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Enable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out Interrupt enable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out Interrupt enable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Set Flag
+        */
+        final abstract class EPINTENSET6 : Register!(0x1a9)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Enable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Enable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Enable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Enable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Enable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out Interrupt enable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out Interrupt enable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Set Flag
+        */
+        final abstract class EPINTENSET7 : Register!(0x1c9)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Enable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Enable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Enable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Enable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Enable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out Interrupt enable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out Interrupt enable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
+        }
+        /*************************************************************************
+         DEVICE End Point Interrupt Set Flag
+        */
+        final abstract class EPINTENSET8 : Register!(0x1e9)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Enable
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Enable
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 0 Interrupt Enable
+            */
+            alias TRFAIL0 = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow 1 Interrupt Enable
+            */
+            alias TRFAIL1 = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Received Setup Interrupt Enable
+            */
+            alias RXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall 0 In/out Interrupt enable
+            */
+            alias STALL0 = Bit!(5, Mutability.rw);
+
+            /*********************************************************************
+             Stall 1 In/out Interrupt enable
+            */
+            alias STALL1 = Bit!(6, Mutability.rw);
         }
     }
     /*****************************************************************************
@@ -2706,66 +2774,87 @@ final abstract class USB : Peripheral!(0x41005000)
         }
 
         /*************************************************************************
-         Descriptor Address
+         Synchronization Busy
         */
-        final abstract class DESCADD : Register!(0x24)
+        final abstract class SYNCBUSY : Register!(0x2)
         {
             /*********************************************************************
-             Descriptor Address Value
+             Software Reset Synchronization Busy
             */
-            alias DESCADD = BitField!(31, 0, Mutability.rw);
+            alias SWRST = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Enable Synchronization Busy
+            */
+            alias ENABLE = Bit!(1, Mutability.r);
         }
 
         /*************************************************************************
-         Finite State Machine Status
+         USB Quality Of Service
         */
-        final abstract class FSMSTATUS : Register!(0xd)
+        final abstract class QOSCTRL : Register!(0x3)
         {
             /*****************************************************************
-             FSMSTATE's possible values
+             CQOS's possible values
             */
-            enum FSMSTATEValues
+            enum CQOSValues
             {
                 /*************************************************************
-                 OFF (L3). It corresponds to the powered-off, disconnected, and disabled state
+                 Background (no sensitive operation)
                 */
-                _0x1 = 0x1,
+                DISABLE = 0x0,
 
                 /*************************************************************
-                 ON (L0). It corresponds to the Idle and Active states
+                 Sensitive Bandwidth
                 */
-                _0x2 = 0x2,
+                LOW = 0x1,
 
                 /*************************************************************
-                 SUSPEND (L2)
+                 Sensitive Latency
                 */
-                _0x4 = 0x4,
+                MEDIUM = 0x2,
 
                 /*************************************************************
-                 SLEEP (L1)
+                 Critical Latency
                 */
-                _0x8 = 0x8,
-
-                /*************************************************************
-                 DNRESUME. Down Stream Resume.
-                */
-                _0x10 = 0x10,
-
-                /*************************************************************
-                 UPRESUME. Up Stream Resume.
-                */
-                _0x20 = 0x20,
-
-                /*************************************************************
-                 RESET. USB lines Reset.
-                */
-                _0x40 = 0x40,
+                HIGH = 0x3,
             }
 
             /*********************************************************************
-             Fine State Machine Status
+             Configuration Quality of Service
             */
-            alias FSMSTATE = BitField!(5, 0, Mutability.r, FSMSTATEValues);
+            alias CQOS = BitField!(1, 0, Mutability.rw, CQOSValues);
+
+            /*****************************************************************
+             DQOS's possible values
+            */
+            enum DQOSValues
+            {
+                /*************************************************************
+                 Background (no sensitive operation)
+                */
+                DISABLE = 0x0,
+
+                /*************************************************************
+                 Sensitive Bandwidth
+                */
+                LOW = 0x1,
+
+                /*************************************************************
+                 Sensitive Latency
+                */
+                MEDIUM = 0x2,
+
+                /*************************************************************
+                 Critical Latency
+                */
+                HIGH = 0x3,
+            }
+
+            /*********************************************************************
+             Data Quality of Service
+            */
+            alias DQOS = BitField!(3, 2, Mutability.rw, DQOSValues);
         }
 
         /*************************************************************************
@@ -2784,24 +2873,14 @@ final abstract class USB : Peripheral!(0x41005000)
             enum SPDCONFValues
             {
                 /*************************************************************
-                 Normal mode:the host starts in full-speed mode and performs a high-speed reset to switch to the high speed mode if the downstream peripheralis high-speed capable.
+                 Normal mode:the host starts in full-speed mode and performs a high-speed reset to switch to the high speed mode if the downstream peripheral is high-speed capable.
                 */
-                _0x0 = 0x0,
+                NORMAL = 0x0,
 
                 /*************************************************************
-                 reserved
+                 Full-speed:the host remains in full-speed mode whatever is the peripheral speed capability. Relevant in UTMI mode only.
                 */
-                _0x1 = 0x1,
-
-                /*************************************************************
-                 reserved
-                */
-                _0x2 = 0x2,
-
-                /*************************************************************
-                 Full-speed:the host remains in full-speed mode whatever is the peripheral speed capability. Releveant in UTMI mode only.
-                */
-                _0x3 = 0x3,
+                FS = 0x3,
             }
 
             /*********************************************************************
@@ -2841,14 +2920,87 @@ final abstract class USB : Peripheral!(0x41005000)
         }
 
         /*************************************************************************
-         HOST Host Frame Length
+         HOST Host Start Of Frame Control
         */
-        final abstract class FLENHIGH : Register!(0x12)
+        final abstract class HSOFC : Register!(0xa)
         {
             /*********************************************************************
-             Frame Length
+             Frame Length Control
             */
-            alias FLENHIGH = BitField!(7, 0, Mutability.r);
+            alias FLENC = BitField!(3, 0, Mutability.rw);
+
+            /*********************************************************************
+             Frame Length Control Enable
+            */
+            alias FLENCE = Bit!(7, Mutability.rw);
+        }
+
+        /*************************************************************************
+         HOST Status
+        */
+        final abstract class STATUS : Register!(0xc)
+        {
+            /*********************************************************************
+             Speed Status
+            */
+            alias SPEED = BitField!(3, 2, Mutability.rw);
+
+            /*********************************************************************
+             USB Line State Status
+            */
+            alias LINESTATE = BitField!(7, 6, Mutability.r);
+        }
+
+        /*************************************************************************
+         Finite State Machine Status
+        */
+        final abstract class FSMSTATUS : Register!(0xd)
+        {
+            /*****************************************************************
+             FSMSTATE's possible values
+            */
+            enum FSMSTATEValues
+            {
+                /*************************************************************
+                 OFF (L3). It corresponds to the powered-off, disconnected, and disabled state
+                */
+                OFF = 0x1,
+
+                /*************************************************************
+                 ON (L0). It corresponds to the Idle and Active states
+                */
+                ON = 0x2,
+
+                /*************************************************************
+                 SUSPEND (L2)
+                */
+                SUSPEND = 0x4,
+
+                /*************************************************************
+                 SLEEP (L1)
+                */
+                SLEEP = 0x8,
+
+                /*************************************************************
+                 DNRESUME. Down Stream Resume.
+                */
+                DNRESUME = 0x10,
+
+                /*************************************************************
+                 UPRESUME. Up Stream Resume.
+                */
+                UPRESUME = 0x20,
+
+                /*************************************************************
+                 RESET. USB lines Reset.
+                */
+                RESET = 0x40,
+            }
+
+            /*********************************************************************
+             Fine State Machine Status
+            */
+            alias FSMSTATE = BitField!(6, 0, Mutability.r, FSMSTATEValues);
         }
 
         /*************************************************************************
@@ -2868,19 +3020,14 @@ final abstract class USB : Peripheral!(0x41005000)
         }
 
         /*************************************************************************
-         HOST Host Start Of Frame Control
+         HOST Host Frame Length
         */
-        final abstract class HSOFC : Register!(0xa)
+        final abstract class FLENHIGH : Register!(0x12)
         {
             /*********************************************************************
-             Frame Length Control
+             Frame Length
             */
-            alias FLENC = BitField!(3, 0, Mutability.rw);
-
-            /*********************************************************************
-             Frame Length Control Enable
-            */
-            alias FLENCE = Bit!(7, Mutability.rw);
+            alias FLENHIGH = BitField!(7, 0, Mutability.r);
         }
 
         /*************************************************************************
@@ -3068,100 +3215,35 @@ final abstract class USB : Peripheral!(0x41005000)
         }
 
         /*************************************************************************
-         HOST Status
+         Descriptor Address
         */
-        final abstract class STATUS : Register!(0xc)
+        final abstract class DESCADD : Register!(0x24)
         {
             /*********************************************************************
-             Speed Status
+             Descriptor Address Value
             */
-            alias SPEED = BitField!(3, 2, Mutability.rw);
-
-            /*********************************************************************
-             USB Line State Status
-            */
-            alias LINESTATE = BitField!(7, 6, Mutability.r);
+            alias DESCADD = BitField!(31, 0, Mutability.rw);
         }
 
         /*************************************************************************
-         HOST Bus Access Period of Pipe
+         USB PAD Calibration
         */
-        final abstract class BINTERVAL1 : Register!(0x103)
+        final abstract class PADCAL : Register!(0x28)
         {
             /*********************************************************************
-             Bit Interval
+             USB Pad Transp calibration
             */
-            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
-        }
-        /*************************************************************************
-         HOST Bus Access Period of Pipe
-        */
-        final abstract class BINTERVAL2 : Register!(0x123)
-        {
+            alias TRANSP = BitField!(4, 0, Mutability.rw);
+
             /*********************************************************************
-             Bit Interval
+             USB Pad Transn calibration
             */
-            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
-        }
-        /*************************************************************************
-         HOST Bus Access Period of Pipe
-        */
-        final abstract class BINTERVAL3 : Register!(0x143)
-        {
+            alias TRANSN = BitField!(10, 6, Mutability.rw);
+
             /*********************************************************************
-             Bit Interval
+             USB Pad Trim calibration
             */
-            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
-        }
-        /*************************************************************************
-         HOST Bus Access Period of Pipe
-        */
-        final abstract class BINTERVAL4 : Register!(0x163)
-        {
-            /*********************************************************************
-             Bit Interval
-            */
-            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
-        }
-        /*************************************************************************
-         HOST Bus Access Period of Pipe
-        */
-        final abstract class BINTERVAL5 : Register!(0x183)
-        {
-            /*********************************************************************
-             Bit Interval
-            */
-            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
-        }
-        /*************************************************************************
-         HOST Bus Access Period of Pipe
-        */
-        final abstract class BINTERVAL6 : Register!(0x1a3)
-        {
-            /*********************************************************************
-             Bit Interval
-            */
-            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
-        }
-        /*************************************************************************
-         HOST Bus Access Period of Pipe
-        */
-        final abstract class BINTERVAL7 : Register!(0x1c3)
-        {
-            /*********************************************************************
-             Bit Interval
-            */
-            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
-        }
-        /*************************************************************************
-         HOST Bus Access Period of Pipe
-        */
-        final abstract class BINTERVAL8 : Register!(0x1e3)
-        {
-            /*********************************************************************
-             Bit Interval
-            */
-            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
+            alias TRIM = BitField!(14, 12, Mutability.rw);
         }
 
         /*************************************************************************
@@ -3323,6 +3405,1091 @@ final abstract class USB : Peripheral!(0x41005000)
              Pipe Type
             */
             alias PTYPE = BitField!(5, 3, Mutability.rw);
+        }
+
+        /*************************************************************************
+         HOST Bus Access Period of Pipe
+        */
+        final abstract class BINTERVAL1 : Register!(0x103)
+        {
+            /*********************************************************************
+             Bit Interval
+            */
+            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
+        }
+        /*************************************************************************
+         HOST Bus Access Period of Pipe
+        */
+        final abstract class BINTERVAL2 : Register!(0x123)
+        {
+            /*********************************************************************
+             Bit Interval
+            */
+            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
+        }
+        /*************************************************************************
+         HOST Bus Access Period of Pipe
+        */
+        final abstract class BINTERVAL3 : Register!(0x143)
+        {
+            /*********************************************************************
+             Bit Interval
+            */
+            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
+        }
+        /*************************************************************************
+         HOST Bus Access Period of Pipe
+        */
+        final abstract class BINTERVAL4 : Register!(0x163)
+        {
+            /*********************************************************************
+             Bit Interval
+            */
+            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
+        }
+        /*************************************************************************
+         HOST Bus Access Period of Pipe
+        */
+        final abstract class BINTERVAL5 : Register!(0x183)
+        {
+            /*********************************************************************
+             Bit Interval
+            */
+            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
+        }
+        /*************************************************************************
+         HOST Bus Access Period of Pipe
+        */
+        final abstract class BINTERVAL6 : Register!(0x1a3)
+        {
+            /*********************************************************************
+             Bit Interval
+            */
+            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
+        }
+        /*************************************************************************
+         HOST Bus Access Period of Pipe
+        */
+        final abstract class BINTERVAL7 : Register!(0x1c3)
+        {
+            /*********************************************************************
+             Bit Interval
+            */
+            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
+        }
+        /*************************************************************************
+         HOST Bus Access Period of Pipe
+        */
+        final abstract class BINTERVAL8 : Register!(0x1e3)
+        {
+            /*********************************************************************
+             Bit Interval
+            */
+            alias BITINTERVAL = BitField!(7, 0, Mutability.rw);
+        }
+
+        /*************************************************************************
+         HOST End Point Pipe Status Clear
+        */
+        final abstract class PSTATUSCLR1 : Register!(0x104)
+        {
+            /*********************************************************************
+             Data Toggle clear
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Curren Bank clear
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Clear
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Clear
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Clear
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status Clear
+        */
+        final abstract class PSTATUSCLR2 : Register!(0x124)
+        {
+            /*********************************************************************
+             Data Toggle clear
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Curren Bank clear
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Clear
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Clear
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Clear
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status Clear
+        */
+        final abstract class PSTATUSCLR3 : Register!(0x144)
+        {
+            /*********************************************************************
+             Data Toggle clear
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Curren Bank clear
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Clear
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Clear
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Clear
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status Clear
+        */
+        final abstract class PSTATUSCLR4 : Register!(0x164)
+        {
+            /*********************************************************************
+             Data Toggle clear
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Curren Bank clear
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Clear
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Clear
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Clear
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status Clear
+        */
+        final abstract class PSTATUSCLR5 : Register!(0x184)
+        {
+            /*********************************************************************
+             Data Toggle clear
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Curren Bank clear
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Clear
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Clear
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Clear
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status Clear
+        */
+        final abstract class PSTATUSCLR6 : Register!(0x1a4)
+        {
+            /*********************************************************************
+             Data Toggle clear
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Curren Bank clear
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Clear
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Clear
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Clear
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status Clear
+        */
+        final abstract class PSTATUSCLR7 : Register!(0x1c4)
+        {
+            /*********************************************************************
+             Data Toggle clear
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Curren Bank clear
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Clear
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Clear
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Clear
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status Clear
+        */
+        final abstract class PSTATUSCLR8 : Register!(0x1e4)
+        {
+            /*********************************************************************
+             Data Toggle clear
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Curren Bank clear
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Clear
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Clear
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Clear
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+
+        /*************************************************************************
+         HOST End Point Pipe Status Set
+        */
+        final abstract class PSTATUSSET1 : Register!(0x105)
+        {
+            /*********************************************************************
+             Data Toggle Set
+            */
+            alias DTGL = Bit!(0, Mutability.w);
+
+            /*********************************************************************
+             Current Bank Set
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Set
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Set
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Set
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status Set
+        */
+        final abstract class PSTATUSSET2 : Register!(0x125)
+        {
+            /*********************************************************************
+             Data Toggle Set
+            */
+            alias DTGL = Bit!(0, Mutability.w);
+
+            /*********************************************************************
+             Current Bank Set
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Set
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Set
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Set
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status Set
+        */
+        final abstract class PSTATUSSET3 : Register!(0x145)
+        {
+            /*********************************************************************
+             Data Toggle Set
+            */
+            alias DTGL = Bit!(0, Mutability.w);
+
+            /*********************************************************************
+             Current Bank Set
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Set
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Set
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Set
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status Set
+        */
+        final abstract class PSTATUSSET4 : Register!(0x165)
+        {
+            /*********************************************************************
+             Data Toggle Set
+            */
+            alias DTGL = Bit!(0, Mutability.w);
+
+            /*********************************************************************
+             Current Bank Set
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Set
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Set
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Set
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status Set
+        */
+        final abstract class PSTATUSSET5 : Register!(0x185)
+        {
+            /*********************************************************************
+             Data Toggle Set
+            */
+            alias DTGL = Bit!(0, Mutability.w);
+
+            /*********************************************************************
+             Current Bank Set
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Set
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Set
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Set
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status Set
+        */
+        final abstract class PSTATUSSET6 : Register!(0x1a5)
+        {
+            /*********************************************************************
+             Data Toggle Set
+            */
+            alias DTGL = Bit!(0, Mutability.w);
+
+            /*********************************************************************
+             Current Bank Set
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Set
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Set
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Set
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status Set
+        */
+        final abstract class PSTATUSSET7 : Register!(0x1c5)
+        {
+            /*********************************************************************
+             Data Toggle Set
+            */
+            alias DTGL = Bit!(0, Mutability.w);
+
+            /*********************************************************************
+             Current Bank Set
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Set
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Set
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Set
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status Set
+        */
+        final abstract class PSTATUSSET8 : Register!(0x1e5)
+        {
+            /*********************************************************************
+             Data Toggle Set
+            */
+            alias DTGL = Bit!(0, Mutability.w);
+
+            /*********************************************************************
+             Current Bank Set
+            */
+            alias CURBK = Bit!(2, Mutability.w);
+
+            /*********************************************************************
+             Pipe Freeze Set
+            */
+            alias PFREEZE = Bit!(4, Mutability.w);
+
+            /*********************************************************************
+             Bank 0 Ready Set
+            */
+            alias BK0RDY = Bit!(6, Mutability.w);
+
+            /*********************************************************************
+             Bank 1 Ready Set
+            */
+            alias BK1RDY = Bit!(7, Mutability.w);
+        }
+
+        /*************************************************************************
+         HOST End Point Pipe Status
+        */
+        final abstract class PSTATUS1 : Register!(0x106)
+        {
+            /*********************************************************************
+             Data Toggle
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Pipe Freeze
+            */
+            alias PFREEZE = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status
+        */
+        final abstract class PSTATUS2 : Register!(0x126)
+        {
+            /*********************************************************************
+             Data Toggle
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Pipe Freeze
+            */
+            alias PFREEZE = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status
+        */
+        final abstract class PSTATUS3 : Register!(0x146)
+        {
+            /*********************************************************************
+             Data Toggle
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Pipe Freeze
+            */
+            alias PFREEZE = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status
+        */
+        final abstract class PSTATUS4 : Register!(0x166)
+        {
+            /*********************************************************************
+             Data Toggle
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Pipe Freeze
+            */
+            alias PFREEZE = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status
+        */
+        final abstract class PSTATUS5 : Register!(0x186)
+        {
+            /*********************************************************************
+             Data Toggle
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Pipe Freeze
+            */
+            alias PFREEZE = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status
+        */
+        final abstract class PSTATUS6 : Register!(0x1a6)
+        {
+            /*********************************************************************
+             Data Toggle
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Pipe Freeze
+            */
+            alias PFREEZE = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status
+        */
+        final abstract class PSTATUS7 : Register!(0x1c6)
+        {
+            /*********************************************************************
+             Data Toggle
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Pipe Freeze
+            */
+            alias PFREEZE = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+        /*************************************************************************
+         HOST End Point Pipe Status
+        */
+        final abstract class PSTATUS8 : Register!(0x1e6)
+        {
+            /*********************************************************************
+             Data Toggle
+            */
+            alias DTGL = Bit!(0, Mutability.r);
+
+            /*********************************************************************
+             Current Bank
+            */
+            alias CURBK = Bit!(2, Mutability.r);
+
+            /*********************************************************************
+             Pipe Freeze
+            */
+            alias PFREEZE = Bit!(4, Mutability.r);
+
+            /*********************************************************************
+             Bank 0 ready
+            */
+            alias BK0RDY = Bit!(6, Mutability.r);
+
+            /*********************************************************************
+             Bank 1 ready
+            */
+            alias BK1RDY = Bit!(7, Mutability.r);
+        }
+
+        /*************************************************************************
+         HOST Pipe Interrupt Flag
+        */
+        final abstract class PINTFLAG1 : Register!(0x107)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Flag
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Flag
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow Interrupt Flag
+            */
+            alias TRFAIL = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Pipe Error Interrupt Flag
+            */
+            alias PERR = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Transmit  Setup Interrupt Flag
+            */
+            alias TXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall Interrupt Flag
+            */
+            alias STALL = Bit!(5, Mutability.rw);
+        }
+        /*************************************************************************
+         HOST Pipe Interrupt Flag
+        */
+        final abstract class PINTFLAG2 : Register!(0x127)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Flag
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Flag
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow Interrupt Flag
+            */
+            alias TRFAIL = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Pipe Error Interrupt Flag
+            */
+            alias PERR = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Transmit  Setup Interrupt Flag
+            */
+            alias TXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall Interrupt Flag
+            */
+            alias STALL = Bit!(5, Mutability.rw);
+        }
+        /*************************************************************************
+         HOST Pipe Interrupt Flag
+        */
+        final abstract class PINTFLAG3 : Register!(0x147)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Flag
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Flag
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow Interrupt Flag
+            */
+            alias TRFAIL = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Pipe Error Interrupt Flag
+            */
+            alias PERR = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Transmit  Setup Interrupt Flag
+            */
+            alias TXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall Interrupt Flag
+            */
+            alias STALL = Bit!(5, Mutability.rw);
+        }
+        /*************************************************************************
+         HOST Pipe Interrupt Flag
+        */
+        final abstract class PINTFLAG4 : Register!(0x167)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Flag
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Flag
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow Interrupt Flag
+            */
+            alias TRFAIL = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Pipe Error Interrupt Flag
+            */
+            alias PERR = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Transmit  Setup Interrupt Flag
+            */
+            alias TXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall Interrupt Flag
+            */
+            alias STALL = Bit!(5, Mutability.rw);
+        }
+        /*************************************************************************
+         HOST Pipe Interrupt Flag
+        */
+        final abstract class PINTFLAG5 : Register!(0x187)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Flag
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Flag
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow Interrupt Flag
+            */
+            alias TRFAIL = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Pipe Error Interrupt Flag
+            */
+            alias PERR = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Transmit  Setup Interrupt Flag
+            */
+            alias TXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall Interrupt Flag
+            */
+            alias STALL = Bit!(5, Mutability.rw);
+        }
+        /*************************************************************************
+         HOST Pipe Interrupt Flag
+        */
+        final abstract class PINTFLAG6 : Register!(0x1a7)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Flag
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Flag
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow Interrupt Flag
+            */
+            alias TRFAIL = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Pipe Error Interrupt Flag
+            */
+            alias PERR = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Transmit  Setup Interrupt Flag
+            */
+            alias TXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall Interrupt Flag
+            */
+            alias STALL = Bit!(5, Mutability.rw);
+        }
+        /*************************************************************************
+         HOST Pipe Interrupt Flag
+        */
+        final abstract class PINTFLAG7 : Register!(0x1c7)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Flag
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Flag
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow Interrupt Flag
+            */
+            alias TRFAIL = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Pipe Error Interrupt Flag
+            */
+            alias PERR = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Transmit  Setup Interrupt Flag
+            */
+            alias TXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall Interrupt Flag
+            */
+            alias STALL = Bit!(5, Mutability.rw);
+        }
+        /*************************************************************************
+         HOST Pipe Interrupt Flag
+        */
+        final abstract class PINTFLAG8 : Register!(0x1e7)
+        {
+            /*********************************************************************
+             Transfer Complete 0 Interrupt Flag
+            */
+            alias TRCPT0 = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Transfer Complete 1 Interrupt Flag
+            */
+            alias TRCPT1 = Bit!(1, Mutability.rw);
+
+            /*********************************************************************
+             Error Flow Interrupt Flag
+            */
+            alias TRFAIL = Bit!(2, Mutability.rw);
+
+            /*********************************************************************
+             Pipe Error Interrupt Flag
+            */
+            alias PERR = Bit!(3, Mutability.rw);
+
+            /*********************************************************************
+             Transmit  Setup Interrupt Flag
+            */
+            alias TXSTP = Bit!(4, Mutability.rw);
+
+            /*********************************************************************
+             Stall Interrupt Flag
+            */
+            alias STALL = Bit!(5, Mutability.rw);
         }
 
         /*************************************************************************
@@ -3885,1047 +5052,6 @@ final abstract class USB : Peripheral!(0x41005000)
              Stall Interrupt Enable
             */
             alias STALL = Bit!(5, Mutability.rw);
-        }
-
-        /*************************************************************************
-         HOST Pipe Interrupt Flag
-        */
-        final abstract class PINTFLAG1 : Register!(0x107)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Flag
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Flag
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow Interrupt Flag
-            */
-            alias TRFAIL = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Pipe Error Interrupt Flag
-            */
-            alias PERR = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Transmit  Setup Interrupt Flag
-            */
-            alias TXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall Interrupt Flag
-            */
-            alias STALL = Bit!(5, Mutability.rw);
-        }
-        /*************************************************************************
-         HOST Pipe Interrupt Flag
-        */
-        final abstract class PINTFLAG2 : Register!(0x127)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Flag
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Flag
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow Interrupt Flag
-            */
-            alias TRFAIL = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Pipe Error Interrupt Flag
-            */
-            alias PERR = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Transmit  Setup Interrupt Flag
-            */
-            alias TXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall Interrupt Flag
-            */
-            alias STALL = Bit!(5, Mutability.rw);
-        }
-        /*************************************************************************
-         HOST Pipe Interrupt Flag
-        */
-        final abstract class PINTFLAG3 : Register!(0x147)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Flag
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Flag
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow Interrupt Flag
-            */
-            alias TRFAIL = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Pipe Error Interrupt Flag
-            */
-            alias PERR = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Transmit  Setup Interrupt Flag
-            */
-            alias TXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall Interrupt Flag
-            */
-            alias STALL = Bit!(5, Mutability.rw);
-        }
-        /*************************************************************************
-         HOST Pipe Interrupt Flag
-        */
-        final abstract class PINTFLAG4 : Register!(0x167)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Flag
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Flag
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow Interrupt Flag
-            */
-            alias TRFAIL = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Pipe Error Interrupt Flag
-            */
-            alias PERR = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Transmit  Setup Interrupt Flag
-            */
-            alias TXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall Interrupt Flag
-            */
-            alias STALL = Bit!(5, Mutability.rw);
-        }
-        /*************************************************************************
-         HOST Pipe Interrupt Flag
-        */
-        final abstract class PINTFLAG5 : Register!(0x187)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Flag
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Flag
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow Interrupt Flag
-            */
-            alias TRFAIL = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Pipe Error Interrupt Flag
-            */
-            alias PERR = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Transmit  Setup Interrupt Flag
-            */
-            alias TXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall Interrupt Flag
-            */
-            alias STALL = Bit!(5, Mutability.rw);
-        }
-        /*************************************************************************
-         HOST Pipe Interrupt Flag
-        */
-        final abstract class PINTFLAG6 : Register!(0x1a7)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Flag
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Flag
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow Interrupt Flag
-            */
-            alias TRFAIL = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Pipe Error Interrupt Flag
-            */
-            alias PERR = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Transmit  Setup Interrupt Flag
-            */
-            alias TXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall Interrupt Flag
-            */
-            alias STALL = Bit!(5, Mutability.rw);
-        }
-        /*************************************************************************
-         HOST Pipe Interrupt Flag
-        */
-        final abstract class PINTFLAG7 : Register!(0x1c7)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Flag
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Flag
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow Interrupt Flag
-            */
-            alias TRFAIL = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Pipe Error Interrupt Flag
-            */
-            alias PERR = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Transmit  Setup Interrupt Flag
-            */
-            alias TXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall Interrupt Flag
-            */
-            alias STALL = Bit!(5, Mutability.rw);
-        }
-        /*************************************************************************
-         HOST Pipe Interrupt Flag
-        */
-        final abstract class PINTFLAG8 : Register!(0x1e7)
-        {
-            /*********************************************************************
-             Transfer Complete 0 Interrupt Flag
-            */
-            alias TRCPT0 = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
-             Transfer Complete 1 Interrupt Flag
-            */
-            alias TRCPT1 = Bit!(1, Mutability.rw);
-
-            /*********************************************************************
-             Error Flow Interrupt Flag
-            */
-            alias TRFAIL = Bit!(2, Mutability.rw);
-
-            /*********************************************************************
-             Pipe Error Interrupt Flag
-            */
-            alias PERR = Bit!(3, Mutability.rw);
-
-            /*********************************************************************
-             Transmit  Setup Interrupt Flag
-            */
-            alias TXSTP = Bit!(4, Mutability.rw);
-
-            /*********************************************************************
-             Stall Interrupt Flag
-            */
-            alias STALL = Bit!(5, Mutability.rw);
-        }
-
-        /*************************************************************************
-         HOST End Point Pipe Status
-        */
-        final abstract class PSTATUS1 : Register!(0x106)
-        {
-            /*********************************************************************
-             Data Toggle
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Pipe Freeze
-            */
-            alias PFREEZE = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status
-        */
-        final abstract class PSTATUS2 : Register!(0x126)
-        {
-            /*********************************************************************
-             Data Toggle
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Pipe Freeze
-            */
-            alias PFREEZE = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status
-        */
-        final abstract class PSTATUS3 : Register!(0x146)
-        {
-            /*********************************************************************
-             Data Toggle
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Pipe Freeze
-            */
-            alias PFREEZE = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status
-        */
-        final abstract class PSTATUS4 : Register!(0x166)
-        {
-            /*********************************************************************
-             Data Toggle
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Pipe Freeze
-            */
-            alias PFREEZE = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status
-        */
-        final abstract class PSTATUS5 : Register!(0x186)
-        {
-            /*********************************************************************
-             Data Toggle
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Pipe Freeze
-            */
-            alias PFREEZE = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status
-        */
-        final abstract class PSTATUS6 : Register!(0x1a6)
-        {
-            /*********************************************************************
-             Data Toggle
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Pipe Freeze
-            */
-            alias PFREEZE = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status
-        */
-        final abstract class PSTATUS7 : Register!(0x1c6)
-        {
-            /*********************************************************************
-             Data Toggle
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Pipe Freeze
-            */
-            alias PFREEZE = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status
-        */
-        final abstract class PSTATUS8 : Register!(0x1e6)
-        {
-            /*********************************************************************
-             Data Toggle
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Current Bank
-            */
-            alias CURBK = Bit!(2, Mutability.r);
-
-            /*********************************************************************
-             Pipe Freeze
-            */
-            alias PFREEZE = Bit!(4, Mutability.r);
-
-            /*********************************************************************
-             Bank 0 ready
-            */
-            alias BK0RDY = Bit!(6, Mutability.r);
-
-            /*********************************************************************
-             Bank 1 ready
-            */
-            alias BK1RDY = Bit!(7, Mutability.r);
-        }
-
-        /*************************************************************************
-         HOST End Point Pipe Status Clear
-        */
-        final abstract class PSTATUSCLR1 : Register!(0x104)
-        {
-            /*********************************************************************
-             Data Toggle clear
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Curren Bank clear
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Clear
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Clear
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Clear
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status Clear
-        */
-        final abstract class PSTATUSCLR2 : Register!(0x124)
-        {
-            /*********************************************************************
-             Data Toggle clear
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Curren Bank clear
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Clear
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Clear
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Clear
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status Clear
-        */
-        final abstract class PSTATUSCLR3 : Register!(0x144)
-        {
-            /*********************************************************************
-             Data Toggle clear
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Curren Bank clear
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Clear
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Clear
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Clear
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status Clear
-        */
-        final abstract class PSTATUSCLR4 : Register!(0x164)
-        {
-            /*********************************************************************
-             Data Toggle clear
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Curren Bank clear
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Clear
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Clear
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Clear
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status Clear
-        */
-        final abstract class PSTATUSCLR5 : Register!(0x184)
-        {
-            /*********************************************************************
-             Data Toggle clear
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Curren Bank clear
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Clear
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Clear
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Clear
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status Clear
-        */
-        final abstract class PSTATUSCLR6 : Register!(0x1a4)
-        {
-            /*********************************************************************
-             Data Toggle clear
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Curren Bank clear
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Clear
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Clear
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Clear
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status Clear
-        */
-        final abstract class PSTATUSCLR7 : Register!(0x1c4)
-        {
-            /*********************************************************************
-             Data Toggle clear
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Curren Bank clear
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Clear
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Clear
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Clear
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status Clear
-        */
-        final abstract class PSTATUSCLR8 : Register!(0x1e4)
-        {
-            /*********************************************************************
-             Data Toggle clear
-            */
-            alias DTGL = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Curren Bank clear
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Clear
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Clear
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Clear
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-
-        /*************************************************************************
-         HOST End Point Pipe Status Set
-        */
-        final abstract class PSTATUSSET1 : Register!(0x105)
-        {
-            /*********************************************************************
-             Data Toggle Set
-            */
-            alias DTGL = Bit!(0, Mutability.w);
-
-            /*********************************************************************
-             Current Bank Set
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Set
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Set
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Set
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status Set
-        */
-        final abstract class PSTATUSSET2 : Register!(0x125)
-        {
-            /*********************************************************************
-             Data Toggle Set
-            */
-            alias DTGL = Bit!(0, Mutability.w);
-
-            /*********************************************************************
-             Current Bank Set
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Set
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Set
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Set
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status Set
-        */
-        final abstract class PSTATUSSET3 : Register!(0x145)
-        {
-            /*********************************************************************
-             Data Toggle Set
-            */
-            alias DTGL = Bit!(0, Mutability.w);
-
-            /*********************************************************************
-             Current Bank Set
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Set
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Set
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Set
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status Set
-        */
-        final abstract class PSTATUSSET4 : Register!(0x165)
-        {
-            /*********************************************************************
-             Data Toggle Set
-            */
-            alias DTGL = Bit!(0, Mutability.w);
-
-            /*********************************************************************
-             Current Bank Set
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Set
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Set
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Set
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status Set
-        */
-        final abstract class PSTATUSSET5 : Register!(0x185)
-        {
-            /*********************************************************************
-             Data Toggle Set
-            */
-            alias DTGL = Bit!(0, Mutability.w);
-
-            /*********************************************************************
-             Current Bank Set
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Set
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Set
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Set
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status Set
-        */
-        final abstract class PSTATUSSET6 : Register!(0x1a5)
-        {
-            /*********************************************************************
-             Data Toggle Set
-            */
-            alias DTGL = Bit!(0, Mutability.w);
-
-            /*********************************************************************
-             Current Bank Set
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Set
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Set
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Set
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status Set
-        */
-        final abstract class PSTATUSSET7 : Register!(0x1c5)
-        {
-            /*********************************************************************
-             Data Toggle Set
-            */
-            alias DTGL = Bit!(0, Mutability.w);
-
-            /*********************************************************************
-             Current Bank Set
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Set
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Set
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Set
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-        /*************************************************************************
-         HOST End Point Pipe Status Set
-        */
-        final abstract class PSTATUSSET8 : Register!(0x1e5)
-        {
-            /*********************************************************************
-             Data Toggle Set
-            */
-            alias DTGL = Bit!(0, Mutability.w);
-
-            /*********************************************************************
-             Current Bank Set
-            */
-            alias CURBK = Bit!(2, Mutability.w);
-
-            /*********************************************************************
-             Pipe Freeze Set
-            */
-            alias PFREEZE = Bit!(4, Mutability.w);
-
-            /*********************************************************************
-             Bank 0 Ready Set
-            */
-            alias BK0RDY = Bit!(6, Mutability.w);
-
-            /*********************************************************************
-             Bank 1 Ready Set
-            */
-            alias BK1RDY = Bit!(7, Mutability.w);
-        }
-
-        /*************************************************************************
-         USB PAD Calibration
-        */
-        final abstract class PADCAL : Register!(0x28)
-        {
-            /*********************************************************************
-             USB Pad Transp calibration
-            */
-            alias TRANSP = BitField!(4, 0, Mutability.rw);
-
-            /*********************************************************************
-             USB Pad Transn calibration
-            */
-            alias TRANSN = BitField!(10, 6, Mutability.rw);
-
-            /*********************************************************************
-             USB Pad Trim calibration
-            */
-            alias TRIM = BitField!(14, 12, Mutability.rw);
-        }
-
-        /*************************************************************************
-         Synchronization Busy
-        */
-        final abstract class SYNCBUSY : Register!(0x2)
-        {
-            /*********************************************************************
-             Software Reset Synchronization Busy
-            */
-            alias SWRST = Bit!(0, Mutability.r);
-
-            /*********************************************************************
-             Enable Synchronization Busy
-            */
-            alias ENABLE = Bit!(1, Mutability.r);
         }
     }
 }

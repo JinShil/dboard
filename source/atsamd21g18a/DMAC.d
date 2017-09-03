@@ -1,6 +1,6 @@
 module atsamd21g18a.dmac;
 
-import mmio;
+import mvf.mmio;
 
 /*****************************************************************************
  Direct Memory Access Controller
@@ -8,378 +8,44 @@ import mmio;
 final abstract class DMAC : Peripheral!(0x41004800)
 {
     /*************************************************************************
-     Active Channel and Levels
+     Control
     */
-    final abstract class ACTIVE : Register!(0x30)
+    final abstract class CTRL : Register!(00)
     {
         /*********************************************************************
-         Level 0 Channel Trigger Request Executing
-        */
-        alias LVLEX0 = Bit!(0, Mutability.r);
-
-        /*********************************************************************
-         Level 1 Channel Trigger Request Executing
-        */
-        alias LVLEX1 = Bit!(1, Mutability.r);
-
-        /*********************************************************************
-         Level 2 Channel Trigger Request Executing
-        */
-        alias LVLEX2 = Bit!(2, Mutability.r);
-
-        /*********************************************************************
-         Level 3 Channel Trigger Request Executing
-        */
-        alias LVLEX3 = Bit!(3, Mutability.r);
-
-        /*********************************************************************
-         Active Channel ID
-        */
-        alias ID = BitField!(12, 8, Mutability.r);
-
-        /*********************************************************************
-         Active Channel Busy
-        */
-        alias ABUSY = Bit!(15, Mutability.r);
-
-        /*********************************************************************
-         Active Channel Block Transfer Count
-        */
-        alias BTCNT = BitField!(31, 16, Mutability.r);
-    }
-
-    /*************************************************************************
-     Descriptor Memory Section Base Address
-    */
-    final abstract class BASEADDR : Register!(0x34)
-    {
-        /*********************************************************************
-         Descriptor Memory Base Address
-        */
-        alias BASEADDR = BitField!(31, 0, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Busy Channels
-    */
-    final abstract class BUSYCH : Register!(0x28)
-    {
-        /*********************************************************************
-         Busy Channel 0
-        */
-        alias BUSYCH0 = Bit!(0, Mutability.r);
-
-        /*********************************************************************
-         Busy Channel 1
-        */
-        alias BUSYCH1 = Bit!(1, Mutability.r);
-
-        /*********************************************************************
-         Busy Channel 2
-        */
-        alias BUSYCH2 = Bit!(2, Mutability.r);
-
-        /*********************************************************************
-         Busy Channel 3
-        */
-        alias BUSYCH3 = Bit!(3, Mutability.r);
-
-        /*********************************************************************
-         Busy Channel 4
-        */
-        alias BUSYCH4 = Bit!(4, Mutability.r);
-
-        /*********************************************************************
-         Busy Channel 5
-        */
-        alias BUSYCH5 = Bit!(5, Mutability.r);
-
-        /*********************************************************************
-         Busy Channel 6
-        */
-        alias BUSYCH6 = Bit!(6, Mutability.r);
-
-        /*********************************************************************
-         Busy Channel 7
-        */
-        alias BUSYCH7 = Bit!(7, Mutability.r);
-
-        /*********************************************************************
-         Busy Channel 8
-        */
-        alias BUSYCH8 = Bit!(8, Mutability.r);
-
-        /*********************************************************************
-         Busy Channel 9
-        */
-        alias BUSYCH9 = Bit!(9, Mutability.r);
-
-        /*********************************************************************
-         Busy Channel 10
-        */
-        alias BUSYCH10 = Bit!(10, Mutability.r);
-
-        /*********************************************************************
-         Busy Channel 11
-        */
-        alias BUSYCH11 = Bit!(11, Mutability.r);
-    }
-
-    /*************************************************************************
-     Channel Control A
-    */
-    final abstract class CHCTRLA : Register!(0x40)
-    {
-        /*********************************************************************
-         Channel Software Reset
+         Software Reset
         */
         alias SWRST = Bit!(0, Mutability.rw);
 
         /*********************************************************************
-         Channel Enable
+         DMA Enable
         */
-        alias ENABLE = Bit!(1, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Channel Control B
-    */
-    final abstract class CHCTRLB : Register!(0x44)
-    {
-        /*****************************************************************
-         EVACT's possible values
-        */
-        enum EVACTValues
-        {
-            /*************************************************************
-             No action
-            */
-            NOACT = 0x0,
-
-            /*************************************************************
-             Transfer and periodic transfer trigger
-            */
-            TRIG = 0x1,
-
-            /*************************************************************
-             Conditional transfer trigger
-            */
-            CTRIG = 0x2,
-
-            /*************************************************************
-             Conditional block transfer
-            */
-            CBLOCK = 0x3,
-
-            /*************************************************************
-             Channel suspend operation
-            */
-            SUSPEND = 0x4,
-
-            /*************************************************************
-             Channel resume operation
-            */
-            RESUME = 0x5,
-
-            /*************************************************************
-             Skip next block suspend action
-            */
-            SSKIP = 0x6,
-        }
+        alias DMAENABLE = Bit!(1, Mutability.rw);
 
         /*********************************************************************
-         Event Input Action
+         CRC Enable
         */
-        alias EVACT = BitField!(2, 0, Mutability.rw, EVACTValues);
+        alias CRCENABLE = Bit!(2, Mutability.rw);
 
         /*********************************************************************
-         Channel Event Input Enable
+         Priority Level 0 Enable
         */
-        alias EVIE = Bit!(3, Mutability.rw);
+        alias LVLEN0 = Bit!(8, Mutability.rw);
 
         /*********************************************************************
-         Channel Event Output Enable
+         Priority Level 1 Enable
         */
-        alias EVOE = Bit!(4, Mutability.rw);
+        alias LVLEN1 = Bit!(9, Mutability.rw);
 
         /*********************************************************************
-         Channel Arbitration Level
+         Priority Level 2 Enable
         */
-        alias LVL = BitField!(6, 5, Mutability.rw);
-
-        /*****************************************************************
-         TRIGSRC's possible values
-        */
-        enum TRIGSRCValues
-        {
-            /*************************************************************
-             Only software/event triggers
-            */
-            DISABLE = 0x0,
-        }
+        alias LVLEN2 = Bit!(10, Mutability.rw);
 
         /*********************************************************************
-         Peripheral Trigger Source
+         Priority Level 3 Enable
         */
-        alias TRIGSRC = BitField!(13, 8, Mutability.rw, TRIGSRCValues);
-
-        /*****************************************************************
-         TRIGACT's possible values
-        */
-        enum TRIGACTValues
-        {
-            /*************************************************************
-             One trigger required for each block transfer
-            */
-            BLOCK = 0x0,
-
-            /*************************************************************
-             One trigger required for each beat transfer
-            */
-            BEAT = 0x2,
-
-            /*************************************************************
-             One trigger required for each transaction
-            */
-            TRANSACTION = 0x3,
-        }
-
-        /*********************************************************************
-         Trigger Action
-        */
-        alias TRIGACT = BitField!(23, 22, Mutability.rw, TRIGACTValues);
-
-        /*****************************************************************
-         CMD's possible values
-        */
-        enum CMDValues
-        {
-            /*************************************************************
-             No action
-            */
-            NOACT = 0x0,
-
-            /*************************************************************
-             Channel suspend operation
-            */
-            SUSPEND = 0x1,
-
-            /*************************************************************
-             Channel resume operation
-            */
-            RESUME = 0x2,
-        }
-
-        /*********************************************************************
-         Software Command
-        */
-        alias CMD = BitField!(25, 24, Mutability.rw, CMDValues);
-    }
-
-    /*************************************************************************
-     Channel ID
-    */
-    final abstract class CHID : Register!(0x3f)
-    {
-        /*********************************************************************
-         Channel ID
-        */
-        alias ID = BitField!(3, 0, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Channel Interrupt Enable Clear
-    */
-    final abstract class CHINTENCLR : Register!(0x4c)
-    {
-        /*********************************************************************
-         Transfer Error Interrupt Enable
-        */
-        alias TERR = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Transfer Complete Interrupt Enable
-        */
-        alias TCMPL = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Channel Suspend Interrupt Enable
-        */
-        alias SUSP = Bit!(2, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Channel Interrupt Enable Set
-    */
-    final abstract class CHINTENSET : Register!(0x4d)
-    {
-        /*********************************************************************
-         Transfer Error Interrupt Enable
-        */
-        alias TERR = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Transfer Complete Interrupt Enable
-        */
-        alias TCMPL = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Channel Suspend Interrupt Enable
-        */
-        alias SUSP = Bit!(2, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Channel Interrupt Flag Status and Clear
-    */
-    final abstract class CHINTFLAG : Register!(0x4e)
-    {
-        /*********************************************************************
-         Transfer Error
-        */
-        alias TERR = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Transfer Complete
-        */
-        alias TCMPL = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Channel Suspend
-        */
-        alias SUSP = Bit!(2, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Channel Status
-    */
-    final abstract class CHSTATUS : Register!(0x4f)
-    {
-        /*********************************************************************
-         Channel Pending
-        */
-        alias PEND = Bit!(0, Mutability.r);
-
-        /*********************************************************************
-         Channel Busy
-        */
-        alias BUSY = Bit!(1, Mutability.r);
-
-        /*********************************************************************
-         Fetch Error
-        */
-        alias FERR = Bit!(2, Mutability.r);
-    }
-
-    /*************************************************************************
-     CRC Checksum
-    */
-    final abstract class CRCCHKSUM : Register!(0x8)
-    {
-        /*********************************************************************
-         CRC Checksum
-        */
-        alias CRCCHKSUM = BitField!(31, 0, Mutability.rw);
+        alias LVLEN3 = Bit!(11, Mutability.rw);
     }
 
     /*************************************************************************
@@ -393,17 +59,17 @@ final abstract class DMAC : Peripheral!(0x41004800)
         enum CRCBEATSIZEValues
         {
             /*************************************************************
-             Byte bus access
+             8-bit bus transfer
             */
             BYTE = 0x0,
 
             /*************************************************************
-             Half-word bus access
+             16-bit bus transfer
             */
             HWORD = 0x1,
 
             /*************************************************************
-             Word bus access
+             32-bit bus transfer
             */
             WORD = 0x2,
         }
@@ -468,6 +134,17 @@ final abstract class DMAC : Peripheral!(0x41004800)
     }
 
     /*************************************************************************
+     CRC Checksum
+    */
+    final abstract class CRCCHKSUM : Register!(0x8)
+    {
+        /*********************************************************************
+         CRC Checksum
+        */
+        alias CRCCHKSUM = BitField!(31, 0, Mutability.rw);
+    }
+
+    /*************************************************************************
      CRC Status
     */
     final abstract class CRCSTATUS : Register!(0xc)
@@ -484,47 +161,6 @@ final abstract class DMAC : Peripheral!(0x41004800)
     }
 
     /*************************************************************************
-     Control
-    */
-    final abstract class CTRL : Register!(00)
-    {
-        /*********************************************************************
-         Software Reset
-        */
-        alias SWRST = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         DMA Enable
-        */
-        alias DMAENABLE = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         CRC Enable
-        */
-        alias CRCENABLE = Bit!(2, Mutability.rw);
-
-        /*********************************************************************
-         Priority Level 0 Enable
-        */
-        alias LVLEN0 = Bit!(8, Mutability.rw);
-
-        /*********************************************************************
-         Priority Level 1 Enable
-        */
-        alias LVLEN1 = Bit!(9, Mutability.rw);
-
-        /*********************************************************************
-         Priority Level 2 Enable
-        */
-        alias LVLEN2 = Bit!(10, Mutability.rw);
-
-        /*********************************************************************
-         Priority Level 3 Enable
-        */
-        alias LVLEN3 = Bit!(11, Mutability.rw);
-    }
-
-    /*************************************************************************
      Debug Control
     */
     final abstract class DBGCTRL : Register!(0xd)
@@ -533,6 +169,217 @@ final abstract class DMAC : Peripheral!(0x41004800)
          Debug Run
         */
         alias DBGRUN = Bit!(0, Mutability.rw);
+    }
+
+    /*************************************************************************
+     QOS Control
+    */
+    final abstract class QOSCTRL : Register!(0xe)
+    {
+        /*****************************************************************
+         WRBQOS's possible values
+        */
+        enum WRBQOSValues
+        {
+            /*************************************************************
+             Background (no sensitive operation)
+            */
+            DISABLE = 0x0,
+
+            /*************************************************************
+             Sensitive Bandwidth
+            */
+            LOW = 0x1,
+
+            /*************************************************************
+             Sensitive Latency
+            */
+            MEDIUM = 0x2,
+
+            /*************************************************************
+             Critical Latency
+            */
+            HIGH = 0x3,
+        }
+
+        /*********************************************************************
+         Write-Back Quality of Service
+        */
+        alias WRBQOS = BitField!(1, 0, Mutability.rw, WRBQOSValues);
+
+        /*****************************************************************
+         FQOS's possible values
+        */
+        enum FQOSValues
+        {
+            /*************************************************************
+             Background (no sensitive operation)
+            */
+            DISABLE = 0x0,
+
+            /*************************************************************
+             Sensitive Bandwidth
+            */
+            LOW = 0x1,
+
+            /*************************************************************
+             Sensitive Latency
+            */
+            MEDIUM = 0x2,
+
+            /*************************************************************
+             Critical Latency
+            */
+            HIGH = 0x3,
+        }
+
+        /*********************************************************************
+         Fetch Quality of Service
+        */
+        alias FQOS = BitField!(3, 2, Mutability.rw, FQOSValues);
+
+        /*****************************************************************
+         DQOS's possible values
+        */
+        enum DQOSValues
+        {
+            /*************************************************************
+             Background (no sensitive operation)
+            */
+            DISABLE = 0x0,
+
+            /*************************************************************
+             Sensitive Bandwidth
+            */
+            LOW = 0x1,
+
+            /*************************************************************
+             Sensitive Latency
+            */
+            MEDIUM = 0x2,
+
+            /*************************************************************
+             Critical Latency
+            */
+            HIGH = 0x3,
+        }
+
+        /*********************************************************************
+         Data Transfer Quality of Service
+        */
+        alias DQOS = BitField!(5, 4, Mutability.rw, DQOSValues);
+    }
+
+    /*************************************************************************
+     Software Trigger Control
+    */
+    final abstract class SWTRIGCTRL : Register!(0x10)
+    {
+        /*********************************************************************
+         Channel 0 Software Trigger
+        */
+        alias SWTRIG0 = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Channel 1 Software Trigger
+        */
+        alias SWTRIG1 = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Channel 2 Software Trigger
+        */
+        alias SWTRIG2 = Bit!(2, Mutability.rw);
+
+        /*********************************************************************
+         Channel 3 Software Trigger
+        */
+        alias SWTRIG3 = Bit!(3, Mutability.rw);
+
+        /*********************************************************************
+         Channel 4 Software Trigger
+        */
+        alias SWTRIG4 = Bit!(4, Mutability.rw);
+
+        /*********************************************************************
+         Channel 5 Software Trigger
+        */
+        alias SWTRIG5 = Bit!(5, Mutability.rw);
+
+        /*********************************************************************
+         Channel 6 Software Trigger
+        */
+        alias SWTRIG6 = Bit!(6, Mutability.rw);
+
+        /*********************************************************************
+         Channel 7 Software Trigger
+        */
+        alias SWTRIG7 = Bit!(7, Mutability.rw);
+
+        /*********************************************************************
+         Channel 8 Software Trigger
+        */
+        alias SWTRIG8 = Bit!(8, Mutability.rw);
+
+        /*********************************************************************
+         Channel 9 Software Trigger
+        */
+        alias SWTRIG9 = Bit!(9, Mutability.rw);
+
+        /*********************************************************************
+         Channel 10 Software Trigger
+        */
+        alias SWTRIG10 = Bit!(10, Mutability.rw);
+
+        /*********************************************************************
+         Channel 11 Software Trigger
+        */
+        alias SWTRIG11 = Bit!(11, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Priority Control 0
+    */
+    final abstract class PRICTRL0 : Register!(0x14)
+    {
+        /*********************************************************************
+         Level 0 Channel Priority Number
+        */
+        alias LVLPRI0 = BitField!(3, 0, Mutability.rw);
+
+        /*********************************************************************
+         Level 0 Round-Robin Scheduling Enable
+        */
+        alias RRLVLEN0 = Bit!(7, Mutability.rw);
+
+        /*********************************************************************
+         Level 1 Channel Priority Number
+        */
+        alias LVLPRI1 = BitField!(11, 8, Mutability.rw);
+
+        /*********************************************************************
+         Level 1 Round-Robin Scheduling Enable
+        */
+        alias RRLVLEN1 = Bit!(15, Mutability.rw);
+
+        /*********************************************************************
+         Level 2 Channel Priority Number
+        */
+        alias LVLPRI2 = BitField!(19, 16, Mutability.rw);
+
+        /*********************************************************************
+         Level 2 Round-Robin Scheduling Enable
+        */
+        alias RRLVLEN2 = Bit!(23, Mutability.rw);
+
+        /*********************************************************************
+         Level 3 Channel Priority Number
+        */
+        alias LVLPRI3 = BitField!(27, 24, Mutability.rw);
+
+        /*********************************************************************
+         Level 3 Round-Robin Scheduling Enable
+        */
+        alias RRLVLEN3 = Bit!(31, Mutability.rw);
     }
 
     /*************************************************************************
@@ -643,6 +490,72 @@ final abstract class DMAC : Peripheral!(0x41004800)
     }
 
     /*************************************************************************
+     Busy Channels
+    */
+    final abstract class BUSYCH : Register!(0x28)
+    {
+        /*********************************************************************
+         Busy Channel 0
+        */
+        alias BUSYCH0 = Bit!(0, Mutability.r);
+
+        /*********************************************************************
+         Busy Channel 1
+        */
+        alias BUSYCH1 = Bit!(1, Mutability.r);
+
+        /*********************************************************************
+         Busy Channel 2
+        */
+        alias BUSYCH2 = Bit!(2, Mutability.r);
+
+        /*********************************************************************
+         Busy Channel 3
+        */
+        alias BUSYCH3 = Bit!(3, Mutability.r);
+
+        /*********************************************************************
+         Busy Channel 4
+        */
+        alias BUSYCH4 = Bit!(4, Mutability.r);
+
+        /*********************************************************************
+         Busy Channel 5
+        */
+        alias BUSYCH5 = Bit!(5, Mutability.r);
+
+        /*********************************************************************
+         Busy Channel 6
+        */
+        alias BUSYCH6 = Bit!(6, Mutability.r);
+
+        /*********************************************************************
+         Busy Channel 7
+        */
+        alias BUSYCH7 = Bit!(7, Mutability.r);
+
+        /*********************************************************************
+         Busy Channel 8
+        */
+        alias BUSYCH8 = Bit!(8, Mutability.r);
+
+        /*********************************************************************
+         Busy Channel 9
+        */
+        alias BUSYCH9 = Bit!(9, Mutability.r);
+
+        /*********************************************************************
+         Busy Channel 10
+        */
+        alias BUSYCH10 = Bit!(10, Mutability.r);
+
+        /*********************************************************************
+         Busy Channel 11
+        */
+        alias BUSYCH11 = Bit!(11, Mutability.r);
+    }
+
+    /*************************************************************************
      Pending Channels
     */
     final abstract class PENDCH : Register!(0x2c)
@@ -709,115 +622,55 @@ final abstract class DMAC : Peripheral!(0x41004800)
     }
 
     /*************************************************************************
-     Priority Control 0
+     Active Channel and Levels
     */
-    final abstract class PRICTRL0 : Register!(0x14)
+    final abstract class ACTIVE : Register!(0x30)
     {
         /*********************************************************************
-         Level 0 Channel Priority Number
+         Level 0 Channel Trigger Request Executing
         */
-        alias LVLPRI0 = BitField!(3, 0, Mutability.rw);
+        alias LVLEX0 = Bit!(0, Mutability.r);
 
         /*********************************************************************
-         Level 0 Round-Robin Scheduling Enable
+         Level 1 Channel Trigger Request Executing
         */
-        alias RRLVLEN0 = Bit!(7, Mutability.rw);
+        alias LVLEX1 = Bit!(1, Mutability.r);
 
         /*********************************************************************
-         Level 1 Channel Priority Number
+         Level 2 Channel Trigger Request Executing
         */
-        alias LVLPRI1 = BitField!(11, 8, Mutability.rw);
+        alias LVLEX2 = Bit!(2, Mutability.r);
 
         /*********************************************************************
-         Level 1 Round-Robin Scheduling Enable
+         Level 3 Channel Trigger Request Executing
         */
-        alias RRLVLEN1 = Bit!(15, Mutability.rw);
+        alias LVLEX3 = Bit!(3, Mutability.r);
 
         /*********************************************************************
-         Level 2 Channel Priority Number
+         Active Channel ID
         */
-        alias LVLPRI2 = BitField!(19, 16, Mutability.rw);
+        alias ID = BitField!(12, 8, Mutability.r);
 
         /*********************************************************************
-         Level 2 Round-Robin Scheduling Enable
+         Active Channel Busy
         */
-        alias RRLVLEN2 = Bit!(23, Mutability.rw);
+        alias ABUSY = Bit!(15, Mutability.r);
 
         /*********************************************************************
-         Level 3 Channel Priority Number
+         Active Channel Block Transfer Count
         */
-        alias LVLPRI3 = BitField!(27, 24, Mutability.rw);
-
-        /*********************************************************************
-         Level 3 Round-Robin Scheduling Enable
-        */
-        alias RRLVLEN3 = Bit!(31, Mutability.rw);
+        alias BTCNT = BitField!(31, 16, Mutability.r);
     }
 
     /*************************************************************************
-     Software Trigger Control
+     Descriptor Memory Section Base Address
     */
-    final abstract class SWTRIGCTRL : Register!(0x10)
+    final abstract class BASEADDR : Register!(0x34)
     {
         /*********************************************************************
-         Channel 0 Software Trigger
+         Descriptor Memory Base Address
         */
-        alias SWTRIG0 = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Channel 1 Software Trigger
-        */
-        alias SWTRIG1 = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Channel 2 Software Trigger
-        */
-        alias SWTRIG2 = Bit!(2, Mutability.rw);
-
-        /*********************************************************************
-         Channel 3 Software Trigger
-        */
-        alias SWTRIG3 = Bit!(3, Mutability.rw);
-
-        /*********************************************************************
-         Channel 4 Software Trigger
-        */
-        alias SWTRIG4 = Bit!(4, Mutability.rw);
-
-        /*********************************************************************
-         Channel 5 Software Trigger
-        */
-        alias SWTRIG5 = Bit!(5, Mutability.rw);
-
-        /*********************************************************************
-         Channel 6 Software Trigger
-        */
-        alias SWTRIG6 = Bit!(6, Mutability.rw);
-
-        /*********************************************************************
-         Channel 7 Software Trigger
-        */
-        alias SWTRIG7 = Bit!(7, Mutability.rw);
-
-        /*********************************************************************
-         Channel 8 Software Trigger
-        */
-        alias SWTRIG8 = Bit!(8, Mutability.rw);
-
-        /*********************************************************************
-         Channel 9 Software Trigger
-        */
-        alias SWTRIG9 = Bit!(9, Mutability.rw);
-
-        /*********************************************************************
-         Channel 10 Software Trigger
-        */
-        alias SWTRIG10 = Bit!(10, Mutability.rw);
-
-        /*********************************************************************
-         Channel 11 Software Trigger
-        */
-        alias SWTRIG11 = Bit!(11, Mutability.rw);
+        alias BASEADDR = BitField!(31, 0, Mutability.rw);
     }
 
     /*************************************************************************
@@ -829,5 +682,277 @@ final abstract class DMAC : Peripheral!(0x41004800)
          Write-Back Memory Base Address
         */
         alias WRBADDR = BitField!(31, 0, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Channel ID
+    */
+    final abstract class CHID : Register!(0x3f)
+    {
+        /*********************************************************************
+         Channel ID
+        */
+        alias ID = BitField!(3, 0, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Channel Control A
+    */
+    final abstract class CHCTRLA : Register!(0x40)
+    {
+        /*********************************************************************
+         Channel Software Reset
+        */
+        alias SWRST = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Channel Enable
+        */
+        alias ENABLE = Bit!(1, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Channel Control B
+    */
+    final abstract class CHCTRLB : Register!(0x44)
+    {
+        /*****************************************************************
+         EVACT's possible values
+        */
+        enum EVACTValues
+        {
+            /*************************************************************
+             No action
+            */
+            NOACT = 0x0,
+
+            /*************************************************************
+             Transfer and periodic transfer trigger
+            */
+            TRIG = 0x1,
+
+            /*************************************************************
+             Conditional transfer trigger
+            */
+            CTRIG = 0x2,
+
+            /*************************************************************
+             Conditional block transfer
+            */
+            CBLOCK = 0x3,
+
+            /*************************************************************
+             Channel suspend operation
+            */
+            SUSPEND = 0x4,
+
+            /*************************************************************
+             Channel resume operation
+            */
+            RESUME = 0x5,
+
+            /*************************************************************
+             Skip next block suspend action
+            */
+            SSKIP = 0x6,
+        }
+
+        /*********************************************************************
+         Event Input Action
+        */
+        alias EVACT = BitField!(2, 0, Mutability.rw, EVACTValues);
+
+        /*********************************************************************
+         Channel Event Input Enable
+        */
+        alias EVIE = Bit!(3, Mutability.rw);
+
+        /*********************************************************************
+         Channel Event Output Enable
+        */
+        alias EVOE = Bit!(4, Mutability.rw);
+
+        /*****************************************************************
+         LVL's possible values
+        */
+        enum LVLValues
+        {
+            /*************************************************************
+             Channel Priority Level 0
+            */
+            LVL0 = 0x0,
+
+            /*************************************************************
+             Channel Priority Level 1
+            */
+            LVL1 = 0x1,
+
+            /*************************************************************
+             Channel Priority Level 2
+            */
+            LVL2 = 0x2,
+
+            /*************************************************************
+             Channel Priority Level 3
+            */
+            LVL3 = 0x3,
+        }
+
+        /*********************************************************************
+         Channel Arbitration Level
+        */
+        alias LVL = BitField!(6, 5, Mutability.rw, LVLValues);
+
+        /*****************************************************************
+         TRIGSRC's possible values
+        */
+        enum TRIGSRCValues
+        {
+            /*************************************************************
+             Only software/event triggers
+            */
+            DISABLE = 0x0,
+        }
+
+        /*********************************************************************
+         Trigger Source
+        */
+        alias TRIGSRC = BitField!(13, 8, Mutability.rw, TRIGSRCValues);
+
+        /*****************************************************************
+         TRIGACT's possible values
+        */
+        enum TRIGACTValues
+        {
+            /*************************************************************
+             One trigger required for each block transfer
+            */
+            BLOCK = 0x0,
+
+            /*************************************************************
+             One trigger required for each beat transfer
+            */
+            BEAT = 0x2,
+
+            /*************************************************************
+             One trigger required for each transaction
+            */
+            TRANSACTION = 0x3,
+        }
+
+        /*********************************************************************
+         Trigger Action
+        */
+        alias TRIGACT = BitField!(23, 22, Mutability.rw, TRIGACTValues);
+
+        /*****************************************************************
+         CMD's possible values
+        */
+        enum CMDValues
+        {
+            /*************************************************************
+             No action
+            */
+            NOACT = 0x0,
+
+            /*************************************************************
+             Channel suspend operation
+            */
+            SUSPEND = 0x1,
+
+            /*************************************************************
+             Channel resume operation
+            */
+            RESUME = 0x2,
+        }
+
+        /*********************************************************************
+         Software Command
+        */
+        alias CMD = BitField!(25, 24, Mutability.rw, CMDValues);
+    }
+
+    /*************************************************************************
+     Channel Interrupt Enable Clear
+    */
+    final abstract class CHINTENCLR : Register!(0x4c)
+    {
+        /*********************************************************************
+         Channel Transfer Error Interrupt Enable
+        */
+        alias TERR = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Channel Transfer Complete Interrupt Enable
+        */
+        alias TCMPL = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Channel Suspend Interrupt Enable
+        */
+        alias SUSP = Bit!(2, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Channel Interrupt Enable Set
+    */
+    final abstract class CHINTENSET : Register!(0x4d)
+    {
+        /*********************************************************************
+         Channel Transfer Error Interrupt Enable
+        */
+        alias TERR = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Channel Transfer Complete Interrupt Enable
+        */
+        alias TCMPL = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Channel Suspend Interrupt Enable
+        */
+        alias SUSP = Bit!(2, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Channel Interrupt Flag Status and Clear
+    */
+    final abstract class CHINTFLAG : Register!(0x4e)
+    {
+        /*********************************************************************
+         Channel Transfer Error
+        */
+        alias TERR = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Channel Transfer Complete
+        */
+        alias TCMPL = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Channel Suspend
+        */
+        alias SUSP = Bit!(2, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Channel Status
+    */
+    final abstract class CHSTATUS : Register!(0x4f)
+    {
+        /*********************************************************************
+         Channel Pending
+        */
+        alias PEND = Bit!(0, Mutability.r);
+
+        /*********************************************************************
+         Channel Busy
+        */
+        alias BUSY = Bit!(1, Mutability.r);
+
+        /*********************************************************************
+         Channel Fetch Error
+        */
+        alias FERR = Bit!(2, Mutability.r);
     }
 }

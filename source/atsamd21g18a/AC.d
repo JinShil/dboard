@@ -1,12 +1,295 @@
 module atsamd21g18a.ac;
 
-import mmio;
+import mvf.mmio;
 
 /*****************************************************************************
  Analog Comparators
 */
 final abstract class AC : Peripheral!(0x42004400)
 {
+    /*************************************************************************
+     Control A
+    */
+    final abstract class CTRLA : Register!(00)
+    {
+        /*********************************************************************
+         Software Reset
+        */
+        alias SWRST = Bit!(0, Mutability.w);
+
+        /*********************************************************************
+         Enable
+        */
+        alias ENABLE = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Run in Standby
+        */
+        alias RUNSTDBY = Bit!(2, Mutability.rw);
+
+        /*********************************************************************
+         Low-Power Mux
+        */
+        alias LPMUX = Bit!(7, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Control B
+    */
+    final abstract class CTRLB : Register!(0x1)
+    {
+        /*********************************************************************
+         Comparator 0 Start Comparison
+        */
+        alias START0 = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Comparator 1 Start Comparison
+        */
+        alias START1 = Bit!(1, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Event Control
+    */
+    final abstract class EVCTRL : Register!(0x2)
+    {
+        /*********************************************************************
+         Comparator 0 Event Output Enable
+        */
+        alias COMPEO0 = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Comparator 1 Event Output Enable
+        */
+        alias COMPEO1 = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Window 0 Event Output Enable
+        */
+        alias WINEO0 = Bit!(4, Mutability.rw);
+
+        /*********************************************************************
+         Comparator 0 Event Input
+        */
+        alias COMPEI0 = Bit!(8, Mutability.rw);
+
+        /*********************************************************************
+         Comparator 1 Event Input
+        */
+        alias COMPEI1 = Bit!(9, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Interrupt Enable Clear
+    */
+    final abstract class INTENCLR : Register!(0x4)
+    {
+        /*********************************************************************
+         Comparator 0 Interrupt Enable
+        */
+        alias COMP0 = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Comparator 1 Interrupt Enable
+        */
+        alias COMP1 = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Window 0 Interrupt Enable
+        */
+        alias WIN0 = Bit!(4, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Interrupt Enable Set
+    */
+    final abstract class INTENSET : Register!(0x5)
+    {
+        /*********************************************************************
+         Comparator 0 Interrupt Enable
+        */
+        alias COMP0 = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Comparator 1 Interrupt Enable
+        */
+        alias COMP1 = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Window 0 Interrupt Enable
+        */
+        alias WIN0 = Bit!(4, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Interrupt Flag Status and Clear
+    */
+    final abstract class INTFLAG : Register!(0x6)
+    {
+        /*********************************************************************
+         Comparator 0
+        */
+        alias COMP0 = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Comparator 1
+        */
+        alias COMP1 = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Window 0
+        */
+        alias WIN0 = Bit!(4, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Status A
+    */
+    final abstract class STATUSA : Register!(0x8)
+    {
+        /*********************************************************************
+         Comparator 0 Current State
+        */
+        alias STATE0 = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Comparator 1 Current State
+        */
+        alias STATE1 = Bit!(1, Mutability.rw);
+
+        /*****************************************************************
+         WSTATE0's possible values
+        */
+        enum WSTATE0Values
+        {
+            /*************************************************************
+             Signal is above window
+            */
+            ABOVE = 0x0,
+
+            /*************************************************************
+             Signal is inside window
+            */
+            INSIDE = 0x1,
+
+            /*************************************************************
+             Signal is below window
+            */
+            BELOW = 0x2,
+        }
+
+        /*********************************************************************
+         Window 0 Current State
+        */
+        alias WSTATE0 = BitField!(5, 4, Mutability.rw, WSTATE0Values);
+    }
+
+    /*************************************************************************
+     Status B
+    */
+    final abstract class STATUSB : Register!(0x9)
+    {
+        /*********************************************************************
+         Comparator 0 Ready
+        */
+        alias READY0 = Bit!(0, Mutability.r);
+
+        /*********************************************************************
+         Comparator 1 Ready
+        */
+        alias READY1 = Bit!(1, Mutability.r);
+
+        /*********************************************************************
+         Synchronization Busy
+        */
+        alias SYNCBUSY = Bit!(7, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Status C
+    */
+    final abstract class STATUSC : Register!(0xa)
+    {
+        /*********************************************************************
+         Comparator 0 Current State
+        */
+        alias STATE0 = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Comparator 1 Current State
+        */
+        alias STATE1 = Bit!(1, Mutability.rw);
+
+        /*****************************************************************
+         WSTATE0's possible values
+        */
+        enum WSTATE0Values
+        {
+            /*************************************************************
+             Signal is above window
+            */
+            ABOVE = 0x0,
+
+            /*************************************************************
+             Signal is inside window
+            */
+            INSIDE = 0x1,
+
+            /*************************************************************
+             Signal is below window
+            */
+            BELOW = 0x2,
+        }
+
+        /*********************************************************************
+         Window 0 Current State
+        */
+        alias WSTATE0 = BitField!(5, 4, Mutability.rw, WSTATE0Values);
+    }
+
+    /*************************************************************************
+     Window Control
+    */
+    final abstract class WINCTRL : Register!(0xc)
+    {
+        /*********************************************************************
+         Window 0 Mode Enable
+        */
+        alias WEN0 = Bit!(0, Mutability.rw);
+
+        /*****************************************************************
+         WINTSEL0's possible values
+        */
+        enum WINTSEL0Values
+        {
+            /*************************************************************
+             Interrupt on signal above window
+            */
+            ABOVE = 0x0,
+
+            /*************************************************************
+             Interrupt on signal inside window
+            */
+            INSIDE = 0x1,
+
+            /*************************************************************
+             Interrupt on signal below window
+            */
+            BELOW = 0x2,
+
+            /*************************************************************
+             Interrupt on signal outside window
+            */
+            OUTSIDE = 0x3,
+        }
+
+        /*********************************************************************
+         Window 0 Interrupt Selection
+        */
+        alias WINTSEL0 = BitField!(2, 1, Mutability.rw, WINTSEL0Values);
+    }
+
     /*************************************************************************
      Comparator Control n
     */
@@ -431,142 +714,6 @@ final abstract class AC : Peripheral!(0x42004400)
     }
 
     /*************************************************************************
-     Control A
-    */
-    final abstract class CTRLA : Register!(00)
-    {
-        /*********************************************************************
-         Software Reset
-        */
-        alias SWRST = Bit!(0, Mutability.w);
-
-        /*********************************************************************
-         Enable
-        */
-        alias ENABLE = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Run in Standby
-        */
-        alias RUNSTDBY = Bit!(2, Mutability.rw);
-
-        /*********************************************************************
-         Low-Power Mux
-        */
-        alias LPMUX = Bit!(7, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Control B
-    */
-    final abstract class CTRLB : Register!(0x1)
-    {
-        /*********************************************************************
-         Comparator 0 Start Comparison
-        */
-        alias START0 = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Comparator 1 Start Comparison
-        */
-        alias START1 = Bit!(1, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Event Control
-    */
-    final abstract class EVCTRL : Register!(0x2)
-    {
-        /*********************************************************************
-         Comparator 0 Event Output Enable
-        */
-        alias COMPEO0 = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Comparator 1 Event Output Enable
-        */
-        alias COMPEO1 = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Window 0 Event Output Enable
-        */
-        alias WINEO0 = Bit!(4, Mutability.rw);
-
-        /*********************************************************************
-         Comparator 0 Event Input
-        */
-        alias COMPEI0 = Bit!(8, Mutability.rw);
-
-        /*********************************************************************
-         Comparator 1 Event Input
-        */
-        alias COMPEI1 = Bit!(9, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Interrupt Enable Clear
-    */
-    final abstract class INTENCLR : Register!(0x4)
-    {
-        /*********************************************************************
-         Comparator 0 Interrupt Enable
-        */
-        alias COMP0 = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Comparator 1 Interrupt Enable
-        */
-        alias COMP1 = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Window 0 Interrupt Enable
-        */
-        alias WIN0 = Bit!(4, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Interrupt Enable Set
-    */
-    final abstract class INTENSET : Register!(0x5)
-    {
-        /*********************************************************************
-         Comparator 0 Interrupt Enable
-        */
-        alias COMP0 = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Comparator 1 Interrupt Enable
-        */
-        alias COMP1 = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Window 0 Interrupt Enable
-        */
-        alias WIN0 = Bit!(4, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Interrupt Flag Status and Clear
-    */
-    final abstract class INTFLAG : Register!(0x6)
-    {
-        /*********************************************************************
-         Comparator 0
-        */
-        alias COMP0 = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Comparator 1
-        */
-        alias COMP1 = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Window 0
-        */
-        alias WIN0 = Bit!(4, Mutability.rw);
-    }
-
-    /*************************************************************************
      Scaler n
     */
     final abstract class SCALER1 : Register!(0x20)
@@ -585,152 +732,5 @@ final abstract class AC : Peripheral!(0x42004400)
          Scaler Value
         */
         alias VALUE = BitField!(5, 0, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Status A
-    */
-    final abstract class STATUSA : Register!(0x8)
-    {
-        /*********************************************************************
-         Comparator 0 Current State
-        */
-        alias STATE0 = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Comparator 1 Current State
-        */
-        alias STATE1 = Bit!(1, Mutability.rw);
-
-        /*****************************************************************
-         WSTATE0's possible values
-        */
-        enum WSTATE0Values
-        {
-            /*************************************************************
-             Signal is above window
-            */
-            ABOVE = 0x0,
-
-            /*************************************************************
-             Signal is inside window
-            */
-            INSIDE = 0x1,
-
-            /*************************************************************
-             Signal is below window
-            */
-            BELOW = 0x2,
-        }
-
-        /*********************************************************************
-         Window 0 Current State
-        */
-        alias WSTATE0 = BitField!(5, 4, Mutability.rw, WSTATE0Values);
-    }
-
-    /*************************************************************************
-     Status B
-    */
-    final abstract class STATUSB : Register!(0x9)
-    {
-        /*********************************************************************
-         Comparator 0 Ready
-        */
-        alias READY0 = Bit!(0, Mutability.r);
-
-        /*********************************************************************
-         Comparator 1 Ready
-        */
-        alias READY1 = Bit!(1, Mutability.r);
-
-        /*********************************************************************
-         Synchronization Busy
-        */
-        alias SYNCBUSY = Bit!(7, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Status C
-    */
-    final abstract class STATUSC : Register!(0xa)
-    {
-        /*********************************************************************
-         Comparator 0 Current State
-        */
-        alias STATE0 = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Comparator 1 Current State
-        */
-        alias STATE1 = Bit!(1, Mutability.rw);
-
-        /*****************************************************************
-         WSTATE0's possible values
-        */
-        enum WSTATE0Values
-        {
-            /*************************************************************
-             Signal is above window
-            */
-            ABOVE = 0x0,
-
-            /*************************************************************
-             Signal is inside window
-            */
-            INSIDE = 0x1,
-
-            /*************************************************************
-             Signal is below window
-            */
-            BELOW = 0x2,
-        }
-
-        /*********************************************************************
-         Window 0 Current State
-        */
-        alias WSTATE0 = BitField!(5, 4, Mutability.rw, WSTATE0Values);
-    }
-
-    /*************************************************************************
-     Window Control
-    */
-    final abstract class WINCTRL : Register!(0xc)
-    {
-        /*********************************************************************
-         Window 0 Mode Enable
-        */
-        alias WEN0 = Bit!(0, Mutability.rw);
-
-        /*****************************************************************
-         WINTSEL0's possible values
-        */
-        enum WINTSEL0Values
-        {
-            /*************************************************************
-             Interrupt on signal above window
-            */
-            ABOVE = 0x0,
-
-            /*************************************************************
-             Interrupt on signal inside window
-            */
-            INSIDE = 0x1,
-
-            /*************************************************************
-             Interrupt on signal below window
-            */
-            BELOW = 0x2,
-
-            /*************************************************************
-             Interrupt on signal outside window
-            */
-            OUTSIDE = 0x3,
-        }
-
-        /*********************************************************************
-         Window 0 Interrupt Selection
-        */
-        alias WINTSEL0 = BitField!(2, 1, Mutability.rw, WINTSEL0Values);
     }
 }

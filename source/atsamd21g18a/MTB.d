@@ -1,6 +1,6 @@
 module atsamd21g18a.mtb;
 
-import mmio;
+import mvf.mmio;
 
 /*****************************************************************************
  Cortex-M0+ Micro-Trace Buffer
@@ -8,122 +8,19 @@ import mmio;
 final abstract class MTB : Peripheral!(0x41006000)
 {
     /*************************************************************************
-     MTB Authentication Status
+     MTB Position
     */
-    final abstract class AUTHSTATUS : Register!(0xfb8)
-    {
-    }
-
-    /*************************************************************************
-     MTB Base
-    */
-    final abstract class BASE : Register!(0xc)
-    {
-    }
-
-    /*************************************************************************
-     CoreSight
-    */
-    final abstract class CID0 : Register!(0xff0)
-    {
-    }
-
-    /*************************************************************************
-     CoreSight
-    */
-    final abstract class CID1 : Register!(0xff4)
-    {
-    }
-
-    /*************************************************************************
-     CoreSight
-    */
-    final abstract class CID2 : Register!(0xff8)
-    {
-    }
-
-    /*************************************************************************
-     CoreSight
-    */
-    final abstract class CID3 : Register!(0xffc)
-    {
-    }
-
-    /*************************************************************************
-     MTB Claim Clear
-    */
-    final abstract class CLAIMCLR : Register!(0xfa4)
-    {
-    }
-
-    /*************************************************************************
-     MTB Claim Set
-    */
-    final abstract class CLAIMSET : Register!(0xfa0)
-    {
-    }
-
-    /*************************************************************************
-     MTB Device Architecture
-    */
-    final abstract class DEVARCH : Register!(0xfbc)
-    {
-    }
-
-    /*************************************************************************
-     MTB Device Configuration
-    */
-    final abstract class DEVID : Register!(0xfc8)
-    {
-    }
-
-    /*************************************************************************
-     MTB Device Type
-    */
-    final abstract class DEVTYPE : Register!(0xfcc)
-    {
-    }
-
-    /*************************************************************************
-     MTB Flow
-    */
-    final abstract class FLOW : Register!(0x8)
+    final abstract class POSITION : Register!(00)
     {
         /*********************************************************************
-         Auto Stop Tracing
+         Pointer Value Wraps
         */
-        alias AUTOSTOP = Bit!(0, Mutability.rw);
+        alias WRAP = Bit!(2, Mutability.rw);
 
         /*********************************************************************
-         Auto Halt Request
+         Trace Packet Location Pointer
         */
-        alias AUTOHALT = Bit!(1, Mutability.rw);
-
-        /*********************************************************************
-         Watermark value
-        */
-        alias WATERMARK = BitField!(31, 3, Mutability.rw);
-    }
-
-    /*************************************************************************
-     MTB Integration Mode Control
-    */
-    final abstract class ITCTRL : Register!(0xf00)
-    {
-    }
-
-    /*************************************************************************
-     MTB Lock Access
-    */
-    final abstract class LOCKACCESS : Register!(0xfb0)
-    {
-    }
-
-    /*************************************************************************
-     MTB Lock Status
-    */
-    final abstract class LOCKSTATUS : Register!(0xfb4)
-    {
+        alias POINTER = BitField!(31, 3, Mutability.rw);
     }
 
     /*************************************************************************
@@ -168,30 +65,93 @@ final abstract class MTB : Peripheral!(0x41006000)
     }
 
     /*************************************************************************
-     CoreSight
+     MTB Flow
     */
-    final abstract class PID0 : Register!(0xfe0)
+    final abstract class FLOW : Register!(0x8)
+    {
+        /*********************************************************************
+         Auto Stop Tracing
+        */
+        alias AUTOSTOP = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Auto Halt Request
+        */
+        alias AUTOHALT = Bit!(1, Mutability.rw);
+
+        /*********************************************************************
+         Watermark value
+        */
+        alias WATERMARK = BitField!(31, 3, Mutability.rw);
+    }
+
+    /*************************************************************************
+     MTB Base
+    */
+    final abstract class BASE : Register!(0xc)
     {
     }
 
     /*************************************************************************
-     CoreSight
+     MTB Integration Mode Control
     */
-    final abstract class PID1 : Register!(0xfe4)
+    final abstract class ITCTRL : Register!(0xf00)
     {
     }
 
     /*************************************************************************
-     CoreSight
+     MTB Claim Set
     */
-    final abstract class PID2 : Register!(0xfe8)
+    final abstract class CLAIMSET : Register!(0xfa0)
     {
     }
 
     /*************************************************************************
-     CoreSight
+     MTB Claim Clear
     */
-    final abstract class PID3 : Register!(0xfec)
+    final abstract class CLAIMCLR : Register!(0xfa4)
+    {
+    }
+
+    /*************************************************************************
+     MTB Lock Access
+    */
+    final abstract class LOCKACCESS : Register!(0xfb0)
+    {
+    }
+
+    /*************************************************************************
+     MTB Lock Status
+    */
+    final abstract class LOCKSTATUS : Register!(0xfb4)
+    {
+    }
+
+    /*************************************************************************
+     MTB Authentication Status
+    */
+    final abstract class AUTHSTATUS : Register!(0xfb8)
+    {
+    }
+
+    /*************************************************************************
+     MTB Device Architecture
+    */
+    final abstract class DEVARCH : Register!(0xfbc)
+    {
+    }
+
+    /*************************************************************************
+     MTB Device Configuration
+    */
+    final abstract class DEVID : Register!(0xfc8)
+    {
+    }
+
+    /*************************************************************************
+     MTB Device Type
+    */
+    final abstract class DEVTYPE : Register!(0xfcc)
     {
     }
 
@@ -224,18 +184,58 @@ final abstract class MTB : Peripheral!(0x41006000)
     }
 
     /*************************************************************************
-     MTB Position
+     CoreSight
     */
-    final abstract class POSITION : Register!(00)
+    final abstract class PID0 : Register!(0xfe0)
     {
-        /*********************************************************************
-         Pointer Value Wraps
-        */
-        alias WRAP = Bit!(2, Mutability.rw);
+    }
 
-        /*********************************************************************
-         Trace Packet Location Pointer
-        */
-        alias POINTER = BitField!(31, 3, Mutability.rw);
+    /*************************************************************************
+     CoreSight
+    */
+    final abstract class PID1 : Register!(0xfe4)
+    {
+    }
+
+    /*************************************************************************
+     CoreSight
+    */
+    final abstract class PID2 : Register!(0xfe8)
+    {
+    }
+
+    /*************************************************************************
+     CoreSight
+    */
+    final abstract class PID3 : Register!(0xfec)
+    {
+    }
+
+    /*************************************************************************
+     CoreSight
+    */
+    final abstract class CID0 : Register!(0xff0)
+    {
+    }
+
+    /*************************************************************************
+     CoreSight
+    */
+    final abstract class CID1 : Register!(0xff4)
+    {
+    }
+
+    /*************************************************************************
+     CoreSight
+    */
+    final abstract class CID2 : Register!(0xff8)
+    {
+    }
+
+    /*************************************************************************
+     CoreSight
+    */
+    final abstract class CID3 : Register!(0xffc)
+    {
     }
 }

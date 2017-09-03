@@ -1,23 +1,12 @@
 module atsamd21g18a.nvmctrl;
 
-import mmio;
+import mvf.mmio;
 
 /*****************************************************************************
  Non-Volatile Memory Controller
 */
 final abstract class NVMCTRL : Peripheral!(0x41004000)
 {
-    /*************************************************************************
-     Address
-    */
-    final abstract class ADDR : Register!(0x1c)
-    {
-        /*********************************************************************
-         NVM Address
-        */
-        alias ADDR = BitField!(21, 0, Mutability.rw);
-    }
-
     /*************************************************************************
      Control A
     */
@@ -211,65 +200,6 @@ final abstract class NVMCTRL : Peripheral!(0x41004000)
     }
 
     /*************************************************************************
-     Interrupt Enable Clear
-    */
-    final abstract class INTENCLR : Register!(0xc)
-    {
-        /*********************************************************************
-         NVM Ready Interrupt Enable
-        */
-        alias READY = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Error Interrupt Enable
-        */
-        alias ERROR = Bit!(1, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Interrupt Enable Set
-    */
-    final abstract class INTENSET : Register!(0x10)
-    {
-        /*********************************************************************
-         NVM Ready Interrupt Enable
-        */
-        alias READY = Bit!(0, Mutability.rw);
-
-        /*********************************************************************
-         Error Interrupt Enable
-        */
-        alias ERROR = Bit!(1, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Interrupt Flag Status and Clear
-    */
-    final abstract class INTFLAG : Register!(0x14)
-    {
-        /*********************************************************************
-         NVM Ready
-        */
-        alias READY = Bit!(0, Mutability.r);
-
-        /*********************************************************************
-         Error
-        */
-        alias ERROR = Bit!(1, Mutability.rw);
-    }
-
-    /*************************************************************************
-     Lock Section
-    */
-    final abstract class LOCK : Register!(0x20)
-    {
-        /*********************************************************************
-         Region Lock Bits
-        */
-        alias LOCK = BitField!(15, 0, Mutability.r);
-    }
-
-    /*************************************************************************
      NVM Parameter
     */
     final abstract class PARAM : Register!(0x8)
@@ -332,6 +262,54 @@ final abstract class NVMCTRL : Peripheral!(0x41004000)
     }
 
     /*************************************************************************
+     Interrupt Enable Clear
+    */
+    final abstract class INTENCLR : Register!(0xc)
+    {
+        /*********************************************************************
+         NVM Ready Interrupt Enable
+        */
+        alias READY = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Error Interrupt Enable
+        */
+        alias ERROR = Bit!(1, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Interrupt Enable Set
+    */
+    final abstract class INTENSET : Register!(0x10)
+    {
+        /*********************************************************************
+         NVM Ready Interrupt Enable
+        */
+        alias READY = Bit!(0, Mutability.rw);
+
+        /*********************************************************************
+         Error Interrupt Enable
+        */
+        alias ERROR = Bit!(1, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Interrupt Flag Status and Clear
+    */
+    final abstract class INTFLAG : Register!(0x14)
+    {
+        /*********************************************************************
+         NVM Ready
+        */
+        alias READY = Bit!(0, Mutability.r);
+
+        /*********************************************************************
+         Error
+        */
+        alias ERROR = Bit!(1, Mutability.rw);
+    }
+
+    /*************************************************************************
      Status
     */
     final abstract class STATUS : Register!(0x18)
@@ -365,5 +343,27 @@ final abstract class NVMCTRL : Peripheral!(0x41004000)
          Security Bit Status
         */
         alias SB = Bit!(8, Mutability.r);
+    }
+
+    /*************************************************************************
+     Address
+    */
+    final abstract class ADDR : Register!(0x1c)
+    {
+        /*********************************************************************
+         NVM Address
+        */
+        alias ADDR = BitField!(21, 0, Mutability.rw);
+    }
+
+    /*************************************************************************
+     Lock Section
+    */
+    final abstract class LOCK : Register!(0x20)
+    {
+        /*********************************************************************
+         Region Lock Bits
+        */
+        alias LOCK = BitField!(15, 0, Mutability.r);
     }
 }

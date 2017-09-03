@@ -1,6 +1,6 @@
 module atsamd21g18a.sercom0;
 
-import mmio;
+import mvf.mmio;
 
 /*****************************************************************************
  Serial Communication Interface 0
@@ -12,63 +12,6 @@ final abstract class SERCOM0 : Peripheral!(0x42000800)
     */
     final abstract class I2CM : Peripheral!(0x42000800)
     {
-        /*************************************************************************
-         I2CM Address
-        */
-        final abstract class ADDR : Register!(0x24)
-        {
-            /*********************************************************************
-             Address Value
-            */
-            alias ADDR = BitField!(10, 0, Mutability.rw);
-
-            /*********************************************************************
-             Length Enable
-            */
-            alias LENEN = Bit!(13, Mutability.rw);
-
-            /*********************************************************************
-             High Speed Mode
-            */
-            alias HS = Bit!(14, Mutability.rw);
-
-            /*********************************************************************
-             Ten Bit Addressing Enable
-            */
-            alias TENBITEN = Bit!(15, Mutability.rw);
-
-            /*********************************************************************
-             Length
-            */
-            alias LEN = BitField!(23, 16, Mutability.rw);
-        }
-
-        /*************************************************************************
-         I2CM Baud Rate
-        */
-        final abstract class BAUD : Register!(0xc)
-        {
-            /*********************************************************************
-             Baud Rate Value
-            */
-            alias BAUD = BitField!(7, 0, Mutability.rw);
-
-            /*********************************************************************
-             Baud Rate Value Low
-            */
-            alias BAUDLOW = BitField!(15, 8, Mutability.rw);
-
-            /*********************************************************************
-             High Speed Baud Rate Value
-            */
-            alias HSBAUD = BitField!(23, 16, Mutability.rw);
-
-            /*********************************************************************
-             High Speed Baud Rate Value Low
-            */
-            alias HSBAUDLOW = BitField!(31, 24, Mutability.rw);
-        }
-
         /*************************************************************************
          I2CM Control A
         */
@@ -198,25 +141,29 @@ final abstract class SERCOM0 : Peripheral!(0x42000800)
         }
 
         /*************************************************************************
-         I2CM Data
+         I2CM Baud Rate
         */
-        final abstract class DATA : Register!(0x28)
+        final abstract class BAUD : Register!(0xc)
         {
             /*********************************************************************
-             Data Value
+             Baud Rate Value
             */
-            alias DATA = BitField!(7, 0, Mutability.rw);
-        }
+            alias BAUD = BitField!(7, 0, Mutability.rw);
 
-        /*************************************************************************
-         I2CM Debug Control
-        */
-        final abstract class DBGCTRL : Register!(0x30)
-        {
             /*********************************************************************
-             Debug Mode
+             Baud Rate Value Low
             */
-            alias DBGSTOP = Bit!(0, Mutability.rw);
+            alias BAUDLOW = BitField!(15, 8, Mutability.rw);
+
+            /*********************************************************************
+             High Speed Baud Rate Value
+            */
+            alias HSBAUD = BitField!(23, 16, Mutability.rw);
+
+            /*********************************************************************
+             High Speed Baud Rate Value Low
+            */
+            alias HSBAUDLOW = BitField!(31, 24, Mutability.rw);
         }
 
         /*************************************************************************
@@ -353,26 +300,26 @@ final abstract class SERCOM0 : Peripheral!(0x42000800)
             */
             alias SYSOP = Bit!(2, Mutability.r);
         }
-    }
-    /*****************************************************************************
-     I2C Slave Mode
-    */
-    final abstract class I2CS : Peripheral!(0x42000800)
-    {
+
         /*************************************************************************
-         I2CS Address
+         I2CM Address
         */
         final abstract class ADDR : Register!(0x24)
         {
             /*********************************************************************
-             General Call Address Enable
-            */
-            alias GENCEN = Bit!(0, Mutability.rw);
-
-            /*********************************************************************
              Address Value
             */
-            alias ADDR = BitField!(10, 1, Mutability.rw);
+            alias ADDR = BitField!(10, 0, Mutability.rw);
+
+            /*********************************************************************
+             Length Enable
+            */
+            alias LENEN = Bit!(13, Mutability.rw);
+
+            /*********************************************************************
+             High Speed Mode
+            */
+            alias HS = Bit!(14, Mutability.rw);
 
             /*********************************************************************
              Ten Bit Addressing Enable
@@ -380,11 +327,38 @@ final abstract class SERCOM0 : Peripheral!(0x42000800)
             alias TENBITEN = Bit!(15, Mutability.rw);
 
             /*********************************************************************
-             Address Mask
+             Length
             */
-            alias ADDRMASK = BitField!(26, 17, Mutability.rw);
+            alias LEN = BitField!(23, 16, Mutability.rw);
         }
 
+        /*************************************************************************
+         I2CM Data
+        */
+        final abstract class DATA : Register!(0x28)
+        {
+            /*********************************************************************
+             Data Value
+            */
+            alias DATA = BitField!(7, 0, Mutability.rw);
+        }
+
+        /*************************************************************************
+         I2CM Debug Control
+        */
+        final abstract class DBGCTRL : Register!(0x30)
+        {
+            /*********************************************************************
+             Debug Mode
+            */
+            alias DBGSTOP = Bit!(0, Mutability.rw);
+        }
+    }
+    /*****************************************************************************
+     I2C Slave Mode
+    */
+    final abstract class I2CS : Peripheral!(0x42000800)
+    {
         /*************************************************************************
          I2CS Control A
         */
@@ -511,28 +485,6 @@ final abstract class SERCOM0 : Peripheral!(0x42000800)
              Acknowledge Action
             */
             alias ACKACT = Bit!(18, Mutability.rw);
-        }
-
-        /*************************************************************************
-         I2CS Data
-        */
-        final abstract class DATA : Register!(0x28)
-        {
-            /*********************************************************************
-             Data Value
-            */
-            alias DATA = BitField!(7, 0, Mutability.rw);
-        }
-
-        /*************************************************************************
-         I2CS Debug Control
-        */
-        final abstract class DBGCTRL : Register!(0x30)
-        {
-            /*********************************************************************
-             Debug Mode
-            */
-            alias DBGSTOP = Bit!(0, Mutability.rw);
         }
 
         /*************************************************************************
@@ -679,39 +631,49 @@ final abstract class SERCOM0 : Peripheral!(0x42000800)
             */
             alias ENABLE = Bit!(1, Mutability.r);
         }
+
+        /*************************************************************************
+         I2CS Address
+        */
+        final abstract class ADDR : Register!(0x24)
+        {
+            /*********************************************************************
+             General Call Address Enable
+            */
+            alias GENCEN = Bit!(0, Mutability.rw);
+
+            /*********************************************************************
+             Address Value
+            */
+            alias ADDR = BitField!(10, 1, Mutability.rw);
+
+            /*********************************************************************
+             Ten Bit Addressing Enable
+            */
+            alias TENBITEN = Bit!(15, Mutability.rw);
+
+            /*********************************************************************
+             Address Mask
+            */
+            alias ADDRMASK = BitField!(26, 17, Mutability.rw);
+        }
+
+        /*************************************************************************
+         I2CS Data
+        */
+        final abstract class DATA : Register!(0x28)
+        {
+            /*********************************************************************
+             Data Value
+            */
+            alias DATA = BitField!(7, 0, Mutability.rw);
+        }
     }
     /*****************************************************************************
      SPI Mode
     */
     final abstract class SPI : Peripheral!(0x42000800)
     {
-        /*************************************************************************
-         SPI Address
-        */
-        final abstract class ADDR : Register!(0x24)
-        {
-            /*********************************************************************
-             Address Value
-            */
-            alias ADDR = BitField!(7, 0, Mutability.rw);
-
-            /*********************************************************************
-             Address Mask
-            */
-            alias ADDRMASK = BitField!(23, 16, Mutability.rw);
-        }
-
-        /*************************************************************************
-         SPI Baud Rate
-        */
-        final abstract class BAUD : Register!(0xc)
-        {
-            /*********************************************************************
-             Baud Rate Value
-            */
-            alias BAUD = BitField!(7, 0, Mutability.rw);
-        }
-
         /*************************************************************************
          SPI Control A
         */
@@ -846,25 +808,14 @@ final abstract class SERCOM0 : Peripheral!(0x42000800)
         }
 
         /*************************************************************************
-         SPI Data
+         SPI Baud Rate
         */
-        final abstract class DATA : Register!(0x28)
+        final abstract class BAUD : Register!(0xc)
         {
             /*********************************************************************
-             Data Value
+             Baud Rate Value
             */
-            alias DATA = BitField!(8, 0, Mutability.rw);
-        }
-
-        /*************************************************************************
-         SPI Debug Control
-        */
-        final abstract class DBGCTRL : Register!(0x30)
-        {
-            /*********************************************************************
-             Debug Mode
-            */
-            alias DBGSTOP = Bit!(0, Mutability.rw);
+            alias BAUD = BitField!(7, 0, Mutability.rw);
         }
 
         /*************************************************************************
@@ -991,66 +942,50 @@ final abstract class SERCOM0 : Peripheral!(0x42000800)
             */
             alias CTRLB = Bit!(2, Mutability.r);
         }
+
+        /*************************************************************************
+         SPI Address
+        */
+        final abstract class ADDR : Register!(0x24)
+        {
+            /*********************************************************************
+             Address Value
+            */
+            alias ADDR = BitField!(7, 0, Mutability.rw);
+
+            /*********************************************************************
+             Address Mask
+            */
+            alias ADDRMASK = BitField!(23, 16, Mutability.rw);
+        }
+
+        /*************************************************************************
+         SPI Data
+        */
+        final abstract class DATA : Register!(0x28)
+        {
+            /*********************************************************************
+             Data Value
+            */
+            alias DATA = BitField!(8, 0, Mutability.rw);
+        }
+
+        /*************************************************************************
+         SPI Debug Control
+        */
+        final abstract class DBGCTRL : Register!(0x30)
+        {
+            /*********************************************************************
+             Debug Mode
+            */
+            alias DBGSTOP = Bit!(0, Mutability.rw);
+        }
     }
     /*****************************************************************************
      USART Mode
     */
     final abstract class USART : Peripheral!(0x42000800)
     {
-        /*************************************************************************
-         USART Baud Rate
-        */
-        final abstract class BAUD_DEFAULT_MODE : Register!(0xc)
-        {
-            /*********************************************************************
-             Baud Rate Value
-            */
-            alias BAUD = BitField!(15, 0, Mutability.rw);
-        }
-
-        /*************************************************************************
-         USART Baud Rate
-        */
-        final abstract class BAUD_FRAC_MODE : Register!(0xc)
-        {
-            /*********************************************************************
-             Baud Rate Value
-            */
-            alias BAUD = BitField!(12, 0, Mutability.rw);
-
-            /*********************************************************************
-             Fractional Part
-            */
-            alias FP = BitField!(15, 13, Mutability.rw);
-        }
-
-        /*************************************************************************
-         USART Baud Rate
-        */
-        final abstract class BAUD_FRACFP_MODE : Register!(0xc)
-        {
-            /*********************************************************************
-             Baud Rate Value
-            */
-            alias BAUD = BitField!(12, 0, Mutability.rw);
-
-            /*********************************************************************
-             Fractional Part
-            */
-            alias FP = BitField!(15, 13, Mutability.rw);
-        }
-
-        /*************************************************************************
-         USART Baud Rate
-        */
-        final abstract class BAUD_USARTFP_MODE : Register!(0xc)
-        {
-            /*********************************************************************
-             Baud Rate Value
-            */
-            alias BAUD = BitField!(15, 0, Mutability.rw);
-        }
-
         /*************************************************************************
          USART Control A
         */
@@ -1205,25 +1140,68 @@ final abstract class SERCOM0 : Peripheral!(0x42000800)
         }
 
         /*************************************************************************
-         USART Data
+         USART Baud Rate
         */
-        final abstract class DATA : Register!(0x28)
+        final abstract class BAUD : Register!(0xc)
         {
             /*********************************************************************
-             Data Value
+             Baud Rate Value
             */
-            alias DATA = BitField!(8, 0, Mutability.rw);
+            alias BAUD = BitField!(15, 0, Mutability.rw);
         }
 
         /*************************************************************************
-         USART Debug Control
+         USART Baud Rate
         */
-        final abstract class DBGCTRL : Register!(0x30)
+        final abstract class BAUD_FRAC_MODE : Register!(0xc)
         {
             /*********************************************************************
-             Debug Mode
+             Baud Rate Value
             */
-            alias DBGSTOP = Bit!(0, Mutability.rw);
+            alias BAUD = BitField!(12, 0, Mutability.rw);
+
+            /*********************************************************************
+             Fractional Part
+            */
+            alias FP = BitField!(15, 13, Mutability.rw);
+        }
+
+        /*************************************************************************
+         USART Baud Rate
+        */
+        final abstract class BAUD_FRACFP_MODE : Register!(0xc)
+        {
+            /*********************************************************************
+             Baud Rate Value
+            */
+            alias BAUD = BitField!(12, 0, Mutability.rw);
+
+            /*********************************************************************
+             Fractional Part
+            */
+            alias FP = BitField!(15, 13, Mutability.rw);
+        }
+
+        /*************************************************************************
+         USART Baud Rate
+        */
+        final abstract class BAUD_USARTFP_MODE : Register!(0xc)
+        {
+            /*********************************************************************
+             Baud Rate Value
+            */
+            alias BAUD = BitField!(15, 0, Mutability.rw);
+        }
+
+        /*************************************************************************
+         USART Receive Pulse Length
+        */
+        final abstract class RXPL : Register!(0xe)
+        {
+            /*********************************************************************
+             Receive Pulse Length
+            */
+            alias RXPL = BitField!(7, 0, Mutability.rw);
         }
 
         /*************************************************************************
@@ -1350,17 +1328,6 @@ final abstract class SERCOM0 : Peripheral!(0x42000800)
         }
 
         /*************************************************************************
-         USART Receive Pulse Length
-        */
-        final abstract class RXPL : Register!(0xe)
-        {
-            /*********************************************************************
-             Receive Pulse Length
-            */
-            alias RXPL = BitField!(7, 0, Mutability.rw);
-        }
-
-        /*************************************************************************
          USART Status
         */
         final abstract class STATUS : Register!(0x1a)
@@ -1415,6 +1382,28 @@ final abstract class SERCOM0 : Peripheral!(0x42000800)
              CTRLB Synchronization Busy
             */
             alias CTRLB = Bit!(2, Mutability.r);
+        }
+
+        /*************************************************************************
+         USART Data
+        */
+        final abstract class DATA : Register!(0x28)
+        {
+            /*********************************************************************
+             Data Value
+            */
+            alias DATA = BitField!(8, 0, Mutability.rw);
+        }
+
+        /*************************************************************************
+         USART Debug Control
+        */
+        final abstract class DBGCTRL : Register!(0x30)
+        {
+            /*********************************************************************
+             Debug Mode
+            */
+            alias DBGSTOP = Bit!(0, Mutability.rw);
         }
     }
 }

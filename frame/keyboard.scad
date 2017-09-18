@@ -26,8 +26,8 @@ module left_hand() {
         }
     }
     
-    translate([73.70, 60, 0]) {
-        rotate(a=90 - 28, v=[0,0,1]) {
+    translate([74, 60.25, 0]) {
+        rotate(a=90 - 30, v=[0,0,1]) {
             key_hole();
         }
     }
@@ -52,8 +52,8 @@ module left_hand() {
         }
     }
     
-    translate([82.25, 76.1, 0]) {
-        rotate(a=90 - 28, v=[0,0,1]) {
+    translate([83.15, 76.1, 0]) {
+        rotate(a=90 - 30, v=[0,0,1]) {
             key_hole();
         }
     }
@@ -72,14 +72,14 @@ module left_hand() {
     
     
     
-    translate([113.25, 79.8, 0]) {
-        rotate(a=90 - 45, v=[0,0,1]) {
+    translate([112.25, 79.75, 0]) {
+        rotate(a=90 - 40, v=[0,0,1]) {
             key_hole();
         }
     }
     
-    translate([91, 92.25, 0]) {
-        rotate(a=90 - 29, v=[0,0,1]) {
+    translate([92.5, 92, 0]) {
+        rotate(a=90 - 31, v=[0,0,1]) {
             key_hole();
         }
     }
@@ -92,6 +92,14 @@ module left_hand() {
     
     translate([51.1, 104.55, 0]) {
         rotate(a=90 - 18, v=[0,0,1]) {
+            key_hole();
+        }
+    }
+    
+    
+    
+    translate([50, 127.25, 0]) {
+        rotate(a=90 - 42, v=[0,0,1]) {
             key_hole();
         }
     }

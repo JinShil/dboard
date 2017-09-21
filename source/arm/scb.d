@@ -1,4 +1,4 @@
-module armcm0.scb;
+module arm.scb;
 
 import mvf.mmio;
 

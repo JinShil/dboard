@@ -6,6 +6,8 @@ import atsamd21g18a.hmatrix;
 import atsamd21g18a.nvmctrl;
 import atsamd21g18a.usb;
 import atsamd21g18a.sysctrl;
+import atsamd21g18a.gclk;
+import atsamd21g18a.nvmcal;
 
 private alias ISR = void function(); // Alias Interrupt Service Routine function pointers
 
@@ -87,6 +89,8 @@ private void onReset()
     bss[] = 0;
 
     // CRAMC0
+    // This is undocumented.  It was found in Atmel's startup code.  I don't
+    // know what it does.
     HMATRIX.SFR4.SFR = 2;
     
     // Change default QOS values to have the best performance and correct USB behaviour
@@ -121,11 +125,157 @@ private void onReset()
     }
 
     // Set flash wait states
-    NVMCTRL.CTRLB.RWS = 2;
+    NVMCTRL.CTRLB.RWS = NVMCTRL.CTRLB.RWSValues.DUAL;
 
-    
+    // Switch all peripheral clock to a not enabled general clock to save power.
+    with(GCLK.CLKCTRL)
+    {
+        for(IDValues id = IDValues.DFLL48; id <= IDValues.I2S_1; id++)
+        {
+            // TODO: Enter critical region?
+
+            ID.value = id;
+        
+            // Switch to known-working source so that the channel can be disabled
+            immutable auto previousGen = GEN.value;
+            GEN = GENValues.GCLK0;
+
+            // disable it
+            CLKEN = false;
+            while(CLKEN.value) 
+            { 
+                // wait for it to become disabled
+            }
+
+            // Restore previous configured clock generator
+            GEN.value = previousGen;
+
+            // TODO: exit critical region
+        }
+    }
+
+    // Configure and enable external 32kHz crystal
+    with(SYSCTRL.XOSC32K)
+    {
+        // Number of clock cycles to wait until clock source is considered stable
+        enum StartupValues 
+        {
+            _2048,
+            _4096,
+            _16384,
+            _32768,
+            _65536,
+            _131072,
+            _262144,
+        }
+
+        setValue
+        !(
+              STARTUP,  StartupValues._4096
+            , XTALEN,   true
+            , AAMPEN,   false
+            , EN1K,     false
+            , EN32K,    true
+            , ONDEMAND, true
+            , RUNSTDBY, false
+            , WRTLOCK,  false
+            , ENABLE,   true
+        );
+    }
+
+    // wait for clock source to be ready
+    while(!SYSCTRL.PCLKSR.XOSC32KRDY.value) {}
+
+    // See Errata 9905
+    with(SYSCTRL.DFLLCTRL)
+    {
+        setValue
+        !(
+              WAITLOCK, false
+            , BPLCKC,   false
+            , QLDIS,    false
+            , CCDIS,    false
+            , ONDEMAND, false
+            , RUNSTDBY, false
+            , USBCRM,   false
+            , LLAW,     false
+            , STABLE,   false
+            , MODE,     false
+            , ENABLE,   false
+        );
+    }
+    while(SYSCTRL.PCLKSR.DFLLRDY.value) { } // wait for DFLL sync
+
+    // set course and fine values
+    //TODO: The setValue template can't seem to be used with variables.  Investigate
+    SYSCTRL.DFLLVAL.COARSE = NVMCAL.CAL4.DFLL48M_COARSE_CAL;
+    SYSCTRL.DFLLVAL.FINE = NVMCAL.CAL8.DFLL48M_FINE_CAL;
+
+    // Set DFLL for USB Clock Recovery Mode, Bypass Coarse Lock, Disable Chill Cycle,
+	// Fine calibration register locks (stable) after fine lock
+    with(SYSCTRL.DFLLCTRL)
+    {
+        setValue
+        !(
+              BPLCKC,   true
+            , CCDIS,    true
+            , USBCRM,   true
+            , STABLE,   true
+            , ENABLE,   true
+        );
+    }
+    while(SYSCTRL.PCLKSR.DFLLRDY.value) { }  // wait for DFLL sync
 
     main();
+}
+
+template EnumMembers(E)
+    if (is(E == enum))
+{
+    import std.meta : AliasSeq;
+    // Supply the specified identifier to an constant value.
+    template WithIdentifier(string ident)
+    {
+        static if (ident == "Symbolize")
+        {
+            template Symbolize(alias value)
+            {
+                enum Symbolize = value;
+            }
+        }
+        else
+        {
+            mixin("template Symbolize(alias "~ ident ~")"
+                 ~"{"
+                     ~"alias Symbolize = "~ ident ~";"
+                 ~"}");
+        }
+    }
+
+    template EnumSpecificMembers(names...)
+    {
+        static if (names.length == 1)
+        {
+            alias EnumSpecificMembers = AliasSeq!(WithIdentifier!(names[0])
+                        .Symbolize!(__traits(getMember, E, names[0])));
+        }
+        else static if (names.length > 0)
+        {
+            alias EnumSpecificMembers =
+                AliasSeq!(
+                    WithIdentifier!(names[0])
+                        .Symbolize!(__traits(getMember, E, names[0])),
+                    EnumSpecificMembers!(names[1 .. $/2]),
+                    EnumSpecificMembers!(names[$/2..$])
+                );
+        }
+        else
+        {
+            alias EnumSpecificMembers = AliasSeq!();
+        }
+    }
+
+    alias EnumMembers = EnumSpecificMembers!(__traits(allMembers, E));
 }
 
 private void onNMI()

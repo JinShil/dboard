@@ -187,6 +187,8 @@ private void onReset()
     while(!SYSCTRL.PCLKSR.XOSC32KRDY.value) {}
 
     // See Errata 9905
+    // "The DFLL clock must be requested before being configured otherwise a write access
+    // to a DFLL register can freeze the device."
     with(SYSCTRL.DFLLCTRL)
     {
         setValue
@@ -227,55 +229,6 @@ private void onReset()
     while(SYSCTRL.PCLKSR.DFLLRDY.value) { }  // wait for DFLL sync
 
     main();
-}
-
-template EnumMembers(E)
-    if (is(E == enum))
-{
-    import std.meta : AliasSeq;
-    // Supply the specified identifier to an constant value.
-    template WithIdentifier(string ident)
-    {
-        static if (ident == "Symbolize")
-        {
-            template Symbolize(alias value)
-            {
-                enum Symbolize = value;
-            }
-        }
-        else
-        {
-            mixin("template Symbolize(alias "~ ident ~")"
-                 ~"{"
-                     ~"alias Symbolize = "~ ident ~";"
-                 ~"}");
-        }
-    }
-
-    template EnumSpecificMembers(names...)
-    {
-        static if (names.length == 1)
-        {
-            alias EnumSpecificMembers = AliasSeq!(WithIdentifier!(names[0])
-                        .Symbolize!(__traits(getMember, E, names[0])));
-        }
-        else static if (names.length > 0)
-        {
-            alias EnumSpecificMembers =
-                AliasSeq!(
-                    WithIdentifier!(names[0])
-                        .Symbolize!(__traits(getMember, E, names[0])),
-                    EnumSpecificMembers!(names[1 .. $/2]),
-                    EnumSpecificMembers!(names[$/2..$])
-                );
-        }
-        else
-        {
-            alias EnumSpecificMembers = AliasSeq!();
-        }
-    }
-
-    alias EnumMembers = EnumSpecificMembers!(__traits(allMembers, E));
 }
 
 private void onNMI()

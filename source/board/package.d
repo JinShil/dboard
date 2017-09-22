@@ -183,12 +183,6 @@ private void onReset()
     }
     while(GCLK.STATUS.SYNCBUSY.value) { }  // Wait till synchronization is complete
 
-    // // Enable GCLK generator 4, source = DFFL48, run in Standby, (48MHz/3 = 16MHz)
-    // GCLK->GENDIV.reg = GCLK_GENDIV_ID (4) | GCLK_GENDIV_DIV (GCLK4_DIVIDER);
-    // GCLK->GENCTRL.reg = GCLK_GENCTRL_ID (4) | GCLK_GENCTRL_SRC (GCLK_SOURCE_DFLL48M) |
-    //                     GCLK_GENCTRL_GENEN;
-    // while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY);    // Wait till synchronization is complete
-
     main();
 }
 

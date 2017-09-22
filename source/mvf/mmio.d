@@ -89,6 +89,8 @@ private immutable size_t  SRAMRegionSize               = 0x000F_FFFFu;
 private immutable Address SRAMRegionEnd                = SRAMRegionStart + SRAMRegionSize - 1;
 private immutable Address SRAMBitBandRegionStart       = 0x2200_0000u;
 
+private immutable bool BitBandingSupported             = false;  // Atmel SAMD21 doesn't seem to support bit banding
+
 /****************************************************************************
    Template wrapping volatileLoad intrinsic casting to basic type based on
    size.
@@ -581,9 +583,11 @@ abstract class Peripheral(Address peripheralAddress)
         /***********************************************************************
           Whether or not the address has a bit-banded alias
         */
-        static immutable auto isBitBandable = 
-            (address >= PeripheralRegionStart && address <= PeripheralRegionEnd)
-            || (address >= SRAMRegionStart && address <= SRAMRegionEnd);
+        static immutable auto isBitBandable = BitBandingSupported &&
+            (
+                (address >= PeripheralRegionStart && address <= PeripheralRegionEnd)
+                || (address >= SRAMRegionStart && address <= SRAMRegionEnd)
+            );
 
         
         /***********************************************************************

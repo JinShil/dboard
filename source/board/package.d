@@ -1,6 +1,8 @@
 module board;
 
+import core.bitop;
 import board.trace;
+import atsamd21g18a.pm;
 import atsamd21g18a.dmac;
 import atsamd21g18a.hmatrix;
 import atsamd21g18a.nvmctrl;
@@ -8,10 +10,13 @@ import atsamd21g18a.usb;
 import atsamd21g18a.sysctrl;
 import atsamd21g18a.gclk;
 import atsamd21g18a.nvmcal;
+import atsamd21g18a.pac0;
+import atsamd21g18a.pac1;
+import atsamd21g18a.pac2;
 
 private alias ISR = void function(); // Alias Interrupt Service Routine function pointers
 
-extern(C) immutable ISR[43] _vectorTable =
+private extern(C) immutable ISR[43] _vectorTable =
 [
       &onReset
     , &onNMI
@@ -88,71 +93,15 @@ private void onReset()
     byte[] bss = (cast(byte*)&__bss_start__)[0 .. bssSize];
     bss[] = 0;
 
-    // CRAMC0
-    // This is undocumented.  It was found in Atmel's startup code.  I don't
-    // know what it does.
-    HMATRIX.SFR4.SFR = 2;
-    
-    // Change default QOS values to have the best performance and correct USB behaviour
-    with(USB.DEVICE.QOSCTRL)
-    {
-        CQOS = CQOSValues.MEDIUM;
-        DQOS = DQOSValues.MEDIUM;
-    }
-
-    with(DMAC.QOSCTRL)
-    {
-        DQOS = DQOSValues.MEDIUM;
-        FQOS = FQOSValues.MEDIUM;
-        WRBQOS = WRBQOSValues.MEDIUM;
-    }
-
     // Overwriting the default value of the NVMCTRL.CTRLB.MANW bit (errata reference 13134)
     NVMCTRL.CTRLB.MANW = 1;
 
+    //******************************************************************************************
     // configure clocks
-
-    // Various bits in the INTFLAG register can be set to one at startup.
-	// This will ensure that these bits are cleared
-    with(SYSCTRL.INTFLAG)
-    {
-        setValue
-        !(
-              BOD33DET, true
-            , BOD33RDY, true
-            , DFLLRDY,  true
-        );
-    }
+    //******************************************************************************************
 
     // Set flash wait states
     NVMCTRL.CTRLB.RWS = NVMCTRL.CTRLB.RWSValues.DUAL;
-
-    // Switch all peripheral clock to a not enabled general clock to save power.
-    with(GCLK.CLKCTRL)
-    {
-        for(IDValues id = IDValues.DFLL48; id <= IDValues.I2S_1; id++)
-        {
-            // TODO: Enter critical region?
-
-            ID.value = id;
-        
-            // Switch to known-working source so that the channel can be disabled
-            immutable auto previousGen = GEN.value;
-            GEN = GENValues.GCLK0;
-
-            // disable it
-            CLKEN = false;
-            while(CLKEN.value) 
-            { 
-                // wait for it to become disabled
-            }
-
-            // Restore previous configured clock generator
-            GEN.value = previousGen;
-
-            // TODO: exit critical region
-        }
-    }
 
     // Configure and enable external 32kHz crystal
     with(SYSCTRL.XOSC32K)
@@ -171,42 +120,25 @@ private void onReset()
 
         setValue
         !(
-              STARTUP,  StartupValues._4096
+              STARTUP,  StartupValues._65536
             , XTALEN,   true
             , AAMPEN,   false
             , EN1K,     false
             , EN32K,    true
-            , ONDEMAND, true
+            , ONDEMAND, false
             , RUNSTDBY, false
             , WRTLOCK,  false
             , ENABLE,   true
         );
     }
-
-    // wait for clock source to be ready
-    while(!SYSCTRL.PCLKSR.XOSC32KRDY.value) {}
+    while(!SYSCTRL.PCLKSR.XOSC32KRDY.value) { }
 
     // See Errata 9905
     // "The DFLL clock must be requested before being configured otherwise a write access
-    // to a DFLL register can freeze the device."
-    with(SYSCTRL.DFLLCTRL)
-    {
-        setValue
-        !(
-              WAITLOCK, false
-            , BPLCKC,   false
-            , QLDIS,    false
-            , CCDIS,    false
-            , ONDEMAND, false
-            , RUNSTDBY, false
-            , USBCRM,   false
-            , LLAW,     false
-            , STABLE,   false
-            , MODE,     false
-            , ENABLE,   false
-        );
-    }
-    while(SYSCTRL.PCLKSR.DFLLRDY.value) { } // wait for DFLL sync
+    // to a DFLL register can freeze the device."  This driver will enable and configure
+    // the DFLL before the ONDEMAND bit is set.
+    SYSCTRL.DFLLCTRL.ONDEMAND = false;
+    while(!SYSCTRL.PCLKSR.DFLLRDY.value) { } // wait for DFLL sync
 
     // set course and fine values
     //TODO: The setValue template can't seem to be used with variables.  Investigate
@@ -226,7 +158,36 @@ private void onReset()
             , ENABLE,   true
         );
     }
-    while(SYSCTRL.PCLKSR.DFLLRDY.value) { }  // wait for DFLL sync
+    while(!SYSCTRL.PCLKSR.DFLLRDY.value) { }  // wait for DFLL sync
+
+    // GENCTRL[0] is used for F_CPU (for GCLK_GENCTRL_DIV => 0 & 1 will both do Divide-by-1)
+    with(GCLK.GENDIV)
+    {
+        setValue
+        !(
+              ID,  0
+            , DIV, 1
+        );
+    }
+
+    // Enable GCLK generator 0, source = DFLL48M, run in Standby
+    with(GCLK.GENCTRL)
+    {
+        setValue
+        !(
+              ID,       0
+            , SRC,      SRCValues.DFLL48M
+            , RUNSTDBY, true
+            , GENEN,    true
+        );
+    }
+    while(GCLK.STATUS.SYNCBUSY.value) { }  // Wait till synchronization is complete
+
+    // // Enable GCLK generator 4, source = DFFL48, run in Standby, (48MHz/3 = 16MHz)
+    // GCLK->GENDIV.reg = GCLK_GENDIV_ID (4) | GCLK_GENDIV_DIV (GCLK4_DIVIDER);
+    // GCLK->GENCTRL.reg = GCLK_GENCTRL_ID (4) | GCLK_GENCTRL_SRC (GCLK_SOURCE_DFLL48M) |
+    //                     GCLK_GENCTRL_GENEN;
+    // while (GCLK->STATUS.reg & GCLK_STATUS_SYNCBUSY);    // Wait till synchronization is complete
 
     main();
 }

@@ -1,4 +1,4 @@
-module source.arm.systick;
+module arm.systick;
 
 import mvf.mmio;
 

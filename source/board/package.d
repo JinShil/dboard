@@ -13,6 +13,8 @@ import atsamd21g18a.nvmcal;
 import atsamd21g18a.pac0;
 import atsamd21g18a.pac1;
 import atsamd21g18a.pac2;
+import arm.nvic;
+import atsamd21g18a.irq;
 
 private alias ISR = void function(); // Alias Interrupt Service Routine function pointers
 
@@ -182,6 +184,8 @@ private void onReset()
         );
     }
     while(GCLK.STATUS.SYNCBUSY.value) { }  // Wait till synchronization is complete
+
+    NVIC.IPR[IRQ.USB] = 0;
 
     main();
 }

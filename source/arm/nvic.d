@@ -1,6 +1,8 @@
-module source.arm.scb;
+module arm.nvic;
 
 import mvf.mmio;
+
+ alias SymbolList(TList...) = TList; 
 
 /*****************************************************************************
  Nested Vector Interrupt Controller
@@ -85,5 +87,50 @@ final abstract class NVIC : Peripheral!(0xE000E100)
         alias CLRPEND = BitField!(31, 0, Mutability.rw);
     }
 
-    //TODO: Inte3rrupt Priority Registers
+    /*************************************************************************
+     Interrupt Priority Registers.  Sets or reads interrupt priorities.
+    */
+    alias IPR = SymbolList!
+    (
+          IPR0.PRI0, IPR0.PRI1, IPR0.PRI2, IPR0.PRI3
+        , IPR1.PRI0, IPR1.PRI1, IPR1.PRI2, IPR1.PRI3
+        , IPR2.PRI0, IPR2.PRI1, IPR2.PRI2, IPR2.PRI3
+        , IPR3.PRI0, IPR3.PRI1, IPR3.PRI2, IPR3.PRI3
+        , IPR4.PRI0, IPR4.PRI1, IPR4.PRI2, IPR4.PRI3
+        , IPR5.PRI0, IPR5.PRI1, IPR5.PRI2, IPR5.PRI3
+        , IPR6.PRI0, IPR6.PRI1, IPR6.PRI2, IPR6.PRI3
+        , IPR7.PRI0, IPR7.PRI1, IPR7.PRI2, IPR7.PRI3
+    );
+
+    private alias IPR0 = IPRTemplate!0;
+    private alias IPR1 = IPRTemplate!1;
+    private alias IPR2 = IPRTemplate!2;
+    private alias IPR3 = IPRTemplate!3;
+    private alias IPR4 = IPRTemplate!4;
+    private alias IPR5 = IPRTemplate!5;
+    private alias IPR6 = IPRTemplate!6;
+    private alias IPR7 = IPRTemplate!7;
+
+    private final abstract class IPRTemplate(int bank) : Register!(0x300 + bank * 4)
+    {
+        /*********************************************************************
+         Priority of interrupt number 0
+        */
+        alias PRI0 = BitField!(7, 6, Mutability.rw);
+
+        /*********************************************************************
+         Priority of interrupt number 1
+        */
+        alias PRI1 = BitField!(15, 14, Mutability.rw);
+
+        /*********************************************************************
+         Priority of interrupt number 2
+        */
+        alias PRI2 = BitField!(23, 22, Mutability.rw);
+
+        /*********************************************************************
+         Priority of interrupt number 3
+        */
+        alias PRI3 = BitField!(31, 30, Mutability.rw);
+    }
 }

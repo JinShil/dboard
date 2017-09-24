@@ -15,6 +15,7 @@ import atsamd21g18a.pac1;
 import atsamd21g18a.pac2;
 import arm.nvic;
 import atsamd21g18a.irq;
+import atsamd21g18a.port;
 
 private alias ISR = void function(); // Alias Interrupt Service Routine function pointers
 
@@ -185,7 +186,101 @@ private void onReset()
     }
     while(GCLK.STATUS.SYNCBUSY.value) { }  // Wait till synchronization is complete
 
+    asm { "cpsie i" ::: "memory"; };
+
+    // USB initialization
+
+    //PM.AHBMASK.USB_ = true;
+    PM.APBBMASK.PORT_ = true;
+    PM.APBBMASK.USB_ = true;
+    PM.APBAMASK.GCLK_ = true;
+
+    // with(PORT)
+    // {
+    //     DIR!(P.A).DIR = (1 << 17);  //output
+    //     OUTSET!(P.A).OUTSET = (1 << 17);
+    // }
+
+    with(PORT)
+    {
+        // DIR!(P.A, 24).DIR = 0;
+        // DIR!(P.A, 25).DIR = 0;
+
+        PINCFG!(P.A, 24).PMUXEN = true;
+        PINCFG!(P.A, 25).PMUXEN = true;
+
+        PMUX!(P.A, 24).FUNC = FUNCValues.G;
+        PMUX!(P.A, 25).FUNC = FUNCValues.G;
+    }
+
+    with(GCLK.CLKCTRL)
+    {
+        setValue
+        !(
+              ID,       IDValues.USB
+            , CLKEN,    true
+            , GEN,      GENValues.GCLK0
+        );
+    }
+
+    // GCLK.CLKCTRL.GEN = GCLK.CLKCTRL.GENValues.GCLK0;
+    // GCLK.CLKCTRL.CLKEN = true;
+    while(GCLK.STATUS.SYNCBUSY.value) { }
+
+    USB.DEVICE.CTRLA.SWRST = true;
+    while(USB.DEVICE.SYNCBUSY.SWRST.value) { }
+
+    // CRAMC0
+    // This is undocumented.  It was found in Atmel's startup code.  I don't
+    // know what it does.
+    // HMATRIX.SFR4.SFR = 2;
+
+    // with (USB.DEVICE.QOSCTRL)
+    // {
+    //     setValue
+    //     !(
+    //           CQOS, CQOSValues.MEDIUM
+    //         , DQOS, DQOSValues.MEDIUM
+    //     );
+    // }
+
+    auto pad_transn = NVMCAL.CAL4.USB_TRANSN.value;
+    auto pad_transp = NVMCAL.CAL4.USB_TRANSP.value;
+    auto pad_trim = NVMCAL.CAL4.USB_TRIM.value;
+
+    if (pad_transn == 0x1F)
+    {
+		pad_transn = 5;
+	}
+
+	if (pad_transp == 0x1F) 
+    {
+		pad_transp = 29;
+	}
+
+	if (pad_trim == 0x7) 
+    {
+		pad_trim = 3;
+	}
+
+    with(USB.DEVICE.PADCAL)
+    {
+        TRANSN = pad_transn;
+        TRANSP = pad_transp;
+        TRIM = pad_trim;
+    }
+
+    USB.DEVICE.CTRLB.SPDCONF = USB.DEVICE.CTRLB.SPDCONFValues.FS;
+
+    with (USB.DEVICE.CTRLA)
+    {
+        MODE = MODEValues.DEVICE;
+        ENABLE = true;
+    }
+    while(USB.DEVICE.SYNCBUSY.ENABLE.value) { }
+
     NVIC.IPR[IRQ.USB] = 0;
+    NVIC.ISER.SETENA = (1 << IRQ.USB);
 
     main();
 }
@@ -254,7 +349,7 @@ private void onDirectMemoryAccess()
 
 private void onUSB()
 {
-
+    writeln("USB Interrupt");
 }
 
 private void onEventSystem()

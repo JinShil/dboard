@@ -1,4 +1,4 @@
-// module source.atsamd21g18a.port_iobus;
+// module atsamd21g18a.port_iobus;
 
 // import mvf.mmio;
 

@@ -81,6 +81,8 @@ private extern(C) extern __gshared ubyte __data_end__;
 private extern(C) extern __gshared ubyte __bss_start__;
 private extern(C) extern __gshared ubyte __bss_end__;
 
+private __gshared ubyte[256] usb_mem;
+
 private extern void main();
 
 private void onReset()
@@ -186,7 +188,7 @@ private void onReset()
     }
     while(GCLK.STATUS.SYNCBUSY.value) { }  // Wait till synchronization is complete
 
-    asm { "cpsie i" ::: "memory"; };
+    //asm { "cpsie i" ::: "memory"; };
 
     // USB initialization
 
@@ -205,6 +207,9 @@ private void onReset()
     {
         // DIR!(P.A, 24).DIR = 0;
         // DIR!(P.A, 25).DIR = 0;
+
+        DIRCLR!(P.A).DIRCLR = 1 << 24;
+        DIRCLR!(P.A).DIRCLR = 1 << 25;
 
         PINCFG!(P.A, 24).PMUXEN = true;
         PINCFG!(P.A, 25).PMUXEN = true;
@@ -244,6 +249,14 @@ private void onReset()
     //     );
     // }
 
+
+    with (USB.DEVICE.CTRLA)
+    {
+        MODE = MODEValues.DEVICE;
+        ENABLE = true;
+    }
+    while(USB.DEVICE.SYNCBUSY.ENABLE.value) { }
+
     auto pad_transn = NVMCAL.CAL4.USB_TRANSN.value;
     auto pad_transp = NVMCAL.CAL4.USB_TRANSP.value;
     auto pad_trim = NVMCAL.CAL4.USB_TRIM.value;
@@ -272,15 +285,26 @@ private void onReset()
 
     USB.DEVICE.CTRLB.SPDCONF = USB.DEVICE.CTRLB.SPDCONFValues.FS;
 
-    with (USB.DEVICE.CTRLA)
-    {
-        MODE = MODEValues.DEVICE;
-        ENABLE = true;
-    }
-    while(USB.DEVICE.SYNCBUSY.ENABLE.value) { }
+    USB.DEVICE.DESCADD.DESCADD = cast(uint)(&usb_mem);
+    
+    USB.DEVICE.INTENCLR.EORST = true;
+    USB.DEVICE.INTENSET.EORST = true;
+
+    USB.DEVICE.EPINTENSET!0.RXSTP = true;
+
+    USB.DEVICE.EPCFG!0.EPTYPE0 = 1;
+    USB.DEVICE.EPCFG!0.EPTYPE1 = 1;
+
+    USB.DEVICE.EPSTATUSSET!0.BK0RDY = true;
+    
+    USB.DEVICE.EPSTATUSCLR!0.STALLRQ0 = 1;
+    USB.DEVICE.EPSTATUSCLR!0.DTGLOUT = true;
+
+    
 
     NVIC.IPR[IRQ.USB] = 0;
     NVIC.ISER.SETENA = (1 << IRQ.USB);
+    USB.DEVICE.CTRLB.DETACH = true;
 
     main();
 }
@@ -350,6 +374,8 @@ private void onDirectMemoryAccess()
 private void onUSB()
 {
     writeln("USB Interrupt");
+    while(true)
+    { }
 }
 
 private void onEventSystem()

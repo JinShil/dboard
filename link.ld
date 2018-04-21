@@ -1,8 +1,8 @@
 
 MEMORY
 {
-    FLASH (rx)  : ORIGIN = 0x00000000, LENGTH = 0x00002000
-    SRAM  (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00008000
+    SRAM (rxw) : ORIGIN = 0x20000000, LENGTH = 20k
+    FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 64k
 }
 
 _stackStart = ORIGIN(SRAM) + 4k; /* Falling stack */
@@ -15,13 +15,13 @@ SECTIONS
         *(.ARM.extab*)
         *(.ARM.exidx*)
     }
-    
+
     /* Appears to be just meta-data, so discard it */
     /DISCARD/ :
     {
         *(.ARM.attributes*)
         *(.comment)
-    }    
+    }
 
     /* Code */
     .text :
@@ -29,9 +29,9 @@ SECTIONS
         LONG(_stackStart);                 /* Initial stack pointer */
         KEEP(*(*._vectorTable))            /* Interrupt vector table */
         *(.text)                           /* Our executable code */
-        *(.text*) 
+        *(.text*)
     } > FLASH
-    
+
     /*************************************************************************************
      * immutable variables initialized by the user
      * Examples:
@@ -43,9 +43,9 @@ SECTIONS
         *(.rodata)
         *(.rodata*)
     } > FLASH
-    
+
     __text_end__ = .;
-    
+
     /*************************************************************************************
      * __gshared variables initialized by either the user or the compiler go here.
      * Also __gshared immutables initialized by the user.
@@ -60,9 +60,9 @@ SECTIONS
          __data_start__ = .;
         *(.data)
         *(.data.*)
-        __data_end__ = .;           
+        __data_end__ = .;
     } > SRAM
-    
+
     /*************************************************************************************
      * __gshared variables initialized with void or uninitialized __gshared variables
      * with C linkage go here
@@ -75,6 +75,6 @@ SECTIONS
          __bss_start__ = .;
         *(.bss)
         *(.bss.*)
-        __bss_end__ = .;           
+        __bss_end__ = .;
     } > SRAM
 }

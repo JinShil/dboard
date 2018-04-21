@@ -14,12 +14,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this file.  If not, see <http://www.gnu.org/licenses/>.
 */
+module arm.semihosting;
 
 /*
 See "What is semihosting?" at http://www.keil.com/support/man/docs/armcc/armcc_pge1358787046598.htm
 */
-
-module arm.semihosting;
 
 private enum SYS
 {
@@ -43,21 +42,21 @@ private enum SYS
     TIME         = 0x11,
     TMPNAM       = 0x0D,
 
-    /** 
+    /**
     Writes the contents of a buffer to a specified file at the current file position.
     The file position is specified either:
         * explicitly, by a SYS_SEEK
         * implicitly as one byte beyond the previous SYS_READ or SYS_WRITE request.
-    
+
     The file position is at the start of the file when the file is opened, and is lost
-    when the file is closed. 
-    
+    when the file is closed.
+
     Perform the file operation as a single action whenever possible. For example, do
     not split a write of 16KB into four 4KB chunks unless there is no alternative.
 
     Entry
     On entry, R1 contains a pointer to a three-word data block:
-    
+
         word 1
             contains a handle for a file previously opened with SYS_OPEN
         word 2
@@ -88,10 +87,10 @@ private enum SYS
     Writes a null-terminated string to the debug channel.
 
     When executed under an ARM debugger, the characters appear on the host debugger console.
-    
+
     Entry
     On entry, r1 contains a pointer to the first byte of the string.
-    
+
     Return
     None. Register r0 is corrupted.
     */
@@ -112,11 +111,11 @@ private int call(in SYS operation, in void* message)
     {
         asm
         {
-            "mov r0, %[op]; 
-            mov r1, %[msg]; 
+            "mov r0, %[op];
+            mov r1, %[msg];
             bkpt #0xAB;
             mov %[val], r0;"
-            : [val] "=r" value                             
+            : [val] "=r" value
             : [op] "r" operation, [msg] "r" message
             : "r0", "r1", "memory";
         };

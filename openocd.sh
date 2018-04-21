@@ -1,2 +1,2 @@
 
-openocd -f interface/cmsis-dap.cfg -f target/at91samdXX.cfg
+openocd -f interface/cmsis-dap.cfg -f target/stm32f1x.cfg

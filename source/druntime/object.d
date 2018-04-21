@@ -20,7 +20,7 @@ class Throwable
 { }
 
 class Error : Throwable
-{ 
+{
     this(string x)
     { }
 }

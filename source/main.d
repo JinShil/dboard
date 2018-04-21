@@ -1,12 +1,11 @@
 module main;
 
-import core.bitop;
-import board.trace;
+import maplemini;
 
 void main()
 {
     while(true)
     {
-        writeln("Hello World");
+        writeln!"Hello, World!";
     }
 }

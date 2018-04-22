@@ -6,7 +6,7 @@ import arm.memory;
 
 // import stm32f103xx.rcc;
 // import stm32f103xx.pwr;
-// import stm32f103xx.flash;
+import stm32f103xx.flash;
 // import stm32f103xx.gpio;
 
 public import maplemini.trace;
@@ -94,17 +94,15 @@ extern(C) void hardwareInit()
     // // Flash configuration
     // //----------------------------------------------------------------------
 
-    // // Enable Flash prefetch, Instruction cache, Data cache and wait state
-    // with(FLASH.ACR)
-    // {
-    //     setValue
-    //     !(
-    //           PRFTEN,  true  // prefetch
-    //         , ICEN,    true  // instruction cache
-    //         , DCEN,    true  // data cache
-    //         , LATENCY, 5     // 5 wait states. No choice if we increase
-    //     )();                 //   the clock speed, which we intend to do
-    // }
+    // Enable Flash prefetch, Instruction cache, Data cache and wait state
+    with(FLASH.ACR)
+    {
+        setValue
+        !(
+              PRFTBE,  true  // prefetch
+            , LATENCY, 5     // 5 wait states. No choice if we increase
+        )();                 //   the clock speed, which we intend to do
+    }
 
     // //----------------------------------------------------------------------
     // // Clock configuration

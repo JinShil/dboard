@@ -12,7 +12,7 @@ import stm32f103xx.flash;
 public import maplemini.trace;
 
 // Program's main function
-extern void main();
+extern(C) void main();
 
 /// Call signature of interrupt service routines
 alias ISR = void function();
@@ -43,7 +43,7 @@ private extern(C) immutable ISR[15] _vectorTable =
 ];
 
 /// Software entry point
-@naked void onReset()
+void onReset()
 {
     // Enable Core-coupled memory for stack
     // RCC.AHB1ENR.CCMDATARAMEN = true;
@@ -56,7 +56,7 @@ private extern(C) immutable ISR[15] _vectorTable =
           "ldr r2, handler_address
           bx r2
           handler_address: .word hardwareInit";
-      };
+      }
     }
 }
 

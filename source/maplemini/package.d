@@ -30,14 +30,15 @@ private extern(C) immutable ISR[15] _vectorTable =
     , &defaultHandler
     , &onHardFault
     , &defaultHandler
+    , &onBusFault
+    , &onUsageFault
     , &defaultHandler
     , &defaultHandler
     , &defaultHandler
     , &defaultHandler
     , &defaultHandler
     , &defaultHandler
-    , &defaultHandler
-    , &defaultHandler
+
     , &defaultHandler
     , &defaultHandler
     , &defaultHandler
@@ -55,6 +56,20 @@ void onReset()
 private void onHardFault()
 {
     writeln!"Hard Fault";
+    while(true)
+    { }
+}
+
+private void onBusFault()
+{
+    writeln!"Bus Fault";
+    while(true)
+    { }
+}
+
+private void onUsageFault()
+{
+    writeln!"Usage Fault";
     while(true)
     { }
 }

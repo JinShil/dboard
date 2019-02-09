@@ -5,7 +5,7 @@ import stm32f103xx.mmio;
 /*****************************************************************************
  Backup registers
 */
-final abstract class BKP : Peripheral!(0x40006C04)
+final abstract class BKP : Peripheral!(0x40006C00)
 {
     /*************************************************************************
      Backup data register (BKP_DR)

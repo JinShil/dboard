@@ -91,7 +91,7 @@ private extern(C) immutable ISR[72] _vectorTable =
 
     , &defaultHandler    // EXTI15_10
     , &defaultHandler
-    , &defaultHandler
+    , &onUSBWakeup
     , &defaultHandler
 
     , &defaultHandler    // 44 TIM8_UP
@@ -160,6 +160,11 @@ private void onUSBHighPriority()
 private void onUSBLowPriority()
 {
     writeln!"USB Low Priority Interrupt";
+}
+
+private void onUSBWakeup()
+{
+    writeln!"USB Wakeup Interrupt";
 }
 
 // defined in the linker

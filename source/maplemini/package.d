@@ -24,7 +24,7 @@ alias ISR = void function();
 // them in our linker script
 //----------------------------------------------------------------------
 
-private extern(C) immutable ISR[80] _vectorTable =
+private extern(C) immutable ISR[72] _vectorTable =
 [
       &onReset
     , &defaultHandler
@@ -62,9 +62,9 @@ private extern(C) immutable ISR[80] _vectorTable =
     , &defaultHandler    // DMA1_Channel6
     , &defaultHandler
     , &defaultHandler
-    , &defaultHandler
+    , &onUSBHighPriority
 
-    , &defaultHandler    // CAN1_RX0
+    , &onUSBLowPriority  // USB_LP_CAN_RX0
     , &defaultHandler
     , &defaultHandler
     , &defaultHandler
@@ -94,12 +94,12 @@ private extern(C) immutable ISR[80] _vectorTable =
     , &defaultHandler
     , &defaultHandler
 
-    , &defaultHandler    // 44 Reserved
+    , &defaultHandler    // 44 TIM8_UP
     , &defaultHandler
     , &defaultHandler
     , &defaultHandler
 
-    , &defaultHandler    // 48 Reserved
+    , &defaultHandler    // 48 FSMC
     , &defaultHandler
     , &defaultHandler
     , &defaultHandler
@@ -113,16 +113,6 @@ private extern(C) immutable ISR[80] _vectorTable =
     , &defaultHandler
     , &defaultHandler
     , &defaultHandler
-
-    , &defaultHandler    // 60 DMA1_Channel5
-    , &defaultHandler
-    , &defaultHandler
-    , &defaultHandler
-
-    , &defaultHandler    // 64 CAN2_RX0
-    , &defaultHandler
-    , &defaultHandler
-    , &onUSBInterrupt
 ];
 
 /// Software entry point
@@ -162,9 +152,14 @@ private void onUsageFault()
     { }
 }
 
-private void onUSBInterrupt()
+private void onUSBHighPriority()
 {
+    writeln!"USB High Priority Interrupt";
+}
 
+private void onUSBLowPriority()
+{
+    writeln!"USB Low Priority Interrupt";
 }
 
 // defined in the linker

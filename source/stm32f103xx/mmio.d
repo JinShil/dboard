@@ -70,30 +70,13 @@ final abstract class MyPeripheral : Peripheral!(0x2000_1000)
 */
 module stm32f103xx.mmio;
 
-import gcc.attribute;
-
-private alias Address    = uint;
-private alias BitIndex   = uint;
-private alias HalfWord   = ushort;
-private alias Word       = uint;
-
-// These are the bit band address that can be translated to bit-band addresses
-// that can address a single bit
-private immutable Address PeripheralRegionStart        = 0x4000_0000u;
-private immutable size_t  PeripheralRegionSize         = 0x000F_FFFFu;
-private immutable Address PeripheralRegionEnd          = PeripheralRegionStart + PeripheralRegionSize - 1;
-private immutable Address PeripheralBitBandRegionStart = 0x4200_0000u;
-
-private immutable Address SRAMRegionStart              = 0x2000_0000u;
-private immutable size_t  SRAMRegionSize               = 0x000F_FFFFu;
-private immutable Address SRAMRegionEnd                = SRAMRegionStart + SRAMRegionSize - 1;
-private immutable Address SRAMBitBandRegionStart       = 0x2200_0000u;
+nothrow:
 
 /****************************************************************************
- Template wrapping volatileLoad intrinsic casting to basic type based on
- size.
+   Template wrapping volatileLoad intrinsic casting to basic type based on
+   size.
 */
-private T volatileLoad(T)(T* a) @trusted nothrow
+private T volatileLoad(T)(T* a) @trusted
 {
     static import core.bitop;
     static if (T.sizeof == 1)
@@ -115,10 +98,10 @@ private T volatileLoad(T)(T* a) @trusted nothrow
 }
 
 /****************************************************************************
- Template wrapping volatileStore intrinsic casting to basic type based on
- size.
+   Template wrapping volatileStore intrinsic casting to basic type based on
+   size.
 */
-private void volatileStore(T)(T* a, in T v) @trusted nothrow
+private void volatileStore(T)(T* a, in T v) @trusted
 {
     static import core.bitop;
     static if (T.sizeof == 1)
@@ -135,12 +118,33 @@ private void volatileStore(T)(T* a, in T v) @trusted nothrow
     }
     else
     {
-        static assert(false, "Size not supported.");
+        static assert(false, "Size not supported");
     }
 }
 
+@safe:
+
+private alias Address    = uint;
+private alias BitIndex   = uint;
+private alias HalfWord   = ushort;
+private alias Word       = uint;
+
+// These are the bit band address that can be translated to bit-band addresses
+// that can address a single bit
+private immutable Address PeripheralRegionStart        = 0x4000_0000u;
+private immutable size_t  PeripheralRegionSize         = 0x000F_FFFFu;
+private immutable Address PeripheralRegionEnd          = PeripheralRegionStart + PeripheralRegionSize - 1;
+private immutable Address PeripheralBitBandRegionStart = 0x4200_0000u;
+
+private immutable Address SRAMRegionStart              = 0x2000_0000u;
+private immutable size_t  SRAMRegionSize               = 0x000F_FFFFu;
+private immutable Address SRAMRegionEnd                = SRAMRegionStart + SRAMRegionSize - 1;
+private immutable Address SRAMBitBandRegionStart       = 0x2200_0000u;
+
+
+
 /****************************************************************************
-   Defines the width of access to the fields of a register.  For example, some 
+   Defines the width of access to the fields of a register.  For example, some
    registers can only be accessed by 32-bit words.
 */
 enum Access
@@ -309,7 +313,7 @@ mixin template BitFieldDimensions(BitIndex bitIndex0, BitIndex bitIndex1)
 
       Returns: true if the bitIndex is valid, false if not
     */
-    private static auto isValidBitIndex(immutable BitIndex bitIndex) @safe pure nothrow
+    private static auto isValidBitIndex(immutable BitIndex bitIndex) @safe pure
     {
         return bitIndex >= 0 && bitIndex < (Word.sizeof * 8);
     }
@@ -411,7 +415,7 @@ mixin template BitFieldMutation(Mutability mutability, ValueType_)
         /***********************************************************************
             Get this BitField's value
         */
-        @inline static ValueType value() @property @trusted nothrow
+        @inline pragma(inline, true) static ValueType value() @property @trusted nothrow
         {
             // If only a single bit, use bit banding
             static if (numberOfBits == 1 && isBitBandable)
@@ -449,7 +453,7 @@ mixin template BitFieldMutation(Mutability mutability, ValueType_)
                 /***********************************************************************
                     Clears bit by writing a '0'
                 */
-                @inline static void clear() @safe nothrow
+                @inline pragma(inline, true) static void clear() @safe
                 {
                     value = false;
                 }
@@ -459,7 +463,7 @@ mixin template BitFieldMutation(Mutability mutability, ValueType_)
                 /***********************************************************************
                     Clears bit by writing a '1'
                 */
-                @inline static void clear() @safe nothrow
+                @inline pragma(inline, true) static void clear() @safe
                 {
                     value = true;
                 }
@@ -469,7 +473,7 @@ mixin template BitFieldMutation(Mutability mutability, ValueType_)
                 /***********************************************************************
                     Sets bit by writing a '1'
                 */
-                @inline static void set() @safe nothrow
+                @inline pragma(inline, true) static void set() @safe
                 {
                     value = true;
                 }
@@ -482,7 +486,7 @@ mixin template BitFieldMutation(Mutability mutability, ValueType_)
         /***********************************************************************
             Set this BitField's value
         */
-        @inline static void value(immutable ValueType value_) @property @trusted nothrow
+        @inline pragma(inline, true) static void value(immutable ValueType value_) @property @trusted nothrow
         {
             // If only a single bit, use bit banding
             static if (numberOfBits == 1 && isBitBandable)
@@ -585,6 +589,7 @@ abstract class Peripheral(Address peripheralAddress)
             (address >= PeripheralRegionStart && address <= PeripheralRegionEnd)
             || (address >= SRAMRegionStart && address <= SRAMRegionEnd);
 
+
         /***********************************************************************
           Gets the data width(byte, half-word, word) access policy for this
           register.
@@ -604,7 +609,7 @@ abstract class Peripheral(Address peripheralAddress)
           Sets all bits in the register as a single value.  It's only exposed
           privately to prevent circumventing the access mutability.
         */
-        private static void value(immutable Word value) @property @trusted  nothrow
+        private static void value(immutable Word value) @property @trusted nothrow
         {
             volatileStore(cast(Word*)address, value);
         }
@@ -613,14 +618,10 @@ abstract class Peripheral(Address peripheralAddress)
           Recursive template to combine values of each bitfield passed to the
           setValue function
         */
-        @inline private static Word combineValues(T...)() @safe nothrow
+        @inline pragma(inline, true) private static Word combineValues(T...)() @safe nothrow
         {
             static if (T.length > 0)
             {
-                //TODO: ensure T[0] is a child of this register
-                // Currently doesn't work due to https://issues.dlang.org/show_bug.cgi?id=12496
-                //static assert(__traits(isSame, __traits(parent, T[0]), __traits(parent, value)), "Bitfield is not part of this register");
-
                 //Ensure value assignment is legal
                 // Need to wrap assignment expression in parentheses due to https://issues.dlang.org/show_bug.cgi?id=17703
                 static assert(__traits(compiles, (T[0].value = T[1])), "Invalid assignment");
@@ -640,7 +641,7 @@ abstract class Peripheral(Address peripheralAddress)
           Recursive template to combine masks of each bitfield passed to the
           setValue function
         */
-        @inline private static Word combineMasks(T...)() @safe nothrow
+        @inline pragma(inline, true) private static Word combineMasks(T...)() @safe nothrow
         {
             static if (T.length > 0)
             {
@@ -657,7 +658,7 @@ abstract class Peripheral(Address peripheralAddress)
         /***********************************************************************
           Sets multiple bit fields simultaneously
         */
-        @inline static void setValue(T...)() @safe nothrow
+        @inline pragma(inline, true) static void setValue(T...)() @safe nothrow
         {
             // number of arguments must be even
             static assert(!(T.length & 1), "Wrong number of arguments");
@@ -702,4 +703,3 @@ abstract class Peripheral(Address peripheralAddress)
         }
     }
 }
-

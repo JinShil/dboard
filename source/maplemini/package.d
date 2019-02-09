@@ -10,6 +10,7 @@ import stm32f103xx.flash;
 // import stm32f103xx.gpio;
 
 public import maplemini.trace;
+public import led = maplemini.led;
 
 // Program's main function
 extern(C) void main();
@@ -145,6 +146,8 @@ extern(C) void hardwareInit()
     // Select the main PLL as system clock source
     RCC.CFGR.SW = 0b10; // PLL
     while(RCC.CFGR.SWS != RCC.CFGR.SW) { }
+
+    led.init();
 
     // Call C-main
     main();

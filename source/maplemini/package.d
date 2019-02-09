@@ -4,7 +4,7 @@ import gcc.attribute;
 
 import arm.memory;
 
-// import stm32f103xx.rcc;
+import stm32f103xx.rcc;
 // import stm32f103xx.pwr;
 import stm32f103xx.flash;
 // import stm32f103xx.gpio;
@@ -81,9 +81,9 @@ extern(C) void hardwareInit()
     // zero out variables initialized to void
     memset(&__bss_start__, 0, &__bss_end__ - &__bss_start__);
 
-    // //----------------------------------------------------------------------
-    // // Flash configuration
-    // //----------------------------------------------------------------------
+    //----------------------------------------------------------------------
+    // Flash configuration
+    //----------------------------------------------------------------------
 
     // Enable Flash prefetch, Instruction cache, Data cache and wait state
     with(FLASH.ACR)
@@ -91,101 +91,60 @@ extern(C) void hardwareInit()
         setValue
         !(
               PRFTBE,  true  // prefetch
-            , LATENCY, 5     // 5 wait states. No choice if we increase
-        )();                 //   the clock speed, which we intend to do
+            , LATENCY, 2     // 2 wait states are needed if 48 MHz < SYSCLK ≤ 72 MHz
+        );                   // which will be configured later
     }
 
-    // //----------------------------------------------------------------------
-    // // Clock configuration
-    // //----------------------------------------------------------------------
-    // with (RCC.CR)
-    // {
-    //     setValue
-    //     !(
-    //           HSION,     true      //Default to HSI on
-    //         , HSEON,     false
-    //         , CSSON,     false
-    //         , PLLON,     false
-    //         , PLLISAION, false
-    //         , PLLI2SON,  false
-    //     );
-    // }
-    // while(!RCC.CR.HSIRDY) { }
+    //----------------------------------------------------------------------
+    // Clock configuration
+    //----------------------------------------------------------------------
+    with (RCC.CR)
+    {
+        setValue
+        !(
+              HSION,     true      //Default to HSI on
+            , HSEON,     false
+            , CSSON,     false
+            , PLLON,     false
+        );
+    }
+    while(!RCC.CR.HSIRDY) { }
 
-    // RCC.CR.HSEBYP = false;
+    // From the reference manual:
+    // "The HSEBYP bit can be written only if the HSE oscillator is disabled."
+    // It was disabled above.
+    RCC.CR.HSEBYP = false;
 
-    // with(RCC.CFGR)
-    // {
-    //     setValue
-    //     !(
-    //           MCO2,    0
-    //         , MCO2PRE, 0
-    //         , MCO1PRE, 0
-    //         , I2SSRC,  0
-    //         , MCO1,    0
-    //         , RTCPRE,  0
-    //         , HPRE,    0b000 // AHB  = HCLK divided by 1
-    //         , PPRE2,   0b100 // APB2 = HCLK divided by 2
-    //         , PPRE1,   0b101 // APB1 = HCLK divide by 4
-    //         , SW,      0     // HSI is system clock
-    //     )();
-    // }
+    with(RCC.CFGR)
+    {
+        setValue
+        !(
+              MCO,      0
+            , PLLSRC,   true  // HSE
+            , PLLMUL,   0b111 // 8MHz * 9 = 72MHz
+            , OTGFSPRE, 0     // USB must be 48MHz (72MHz / 1.5)
+            , HPRE,     0b000 // AHB  = HCLK divided by 1
+            , PPRE2,    0b100 // APB2 = HCLK divided by 2
+            , PPRE1,    0b101 // APB1 = HCLK divide by 4
+            , SW,       0     // HSI is system clock
+        )();
+    }
 
-    // //----------------------------------------------------------------------
-    // // Power configuration
-    // //----------------------------------------------------------------------
+    //----------------------------------------------------------------------
+    // External Clock configuration
+    //----------------------------------------------------------------------
 
-    // // Enable clock for the power management peripheral
-    // RCC.APB1ENR.PWREN = true;
+    // Turn on high speed external clock
+    RCC.CR.HSEON = true;
+    while(!RCC.CR.HSERDY) { }
 
-    // // increase voltage from the voltage regulator to acheive a
-    // // greater clock speed at the expense of power consumption
-    // PWR.CR.VOS = 0b11;
+    // Turn on PLL
+    RCC.CR.PLLON = true;
+    while(!RCC.CR.PLLRDY){ }
 
-    // // Enable the Over-drive to extend the clock frequency to 180 Mhz
-    // PWR.CR.ODEN = true;
-    // while(!PWR.CSR.ODRDY) { }
-
-    // PWR.CR.ODSWEN = true;
-    // while(!PWR.CSR.ODSWRDY) {}
-
-    // //----------------------------------------------------------------------
-    // // External Clock configuration
-    // //----------------------------------------------------------------------
-
-    // // Turn on high speed external clock
-    // RCC.CR.HSEON = true;
-    // while(!RCC.CR.HSERDY) { }
-
-    // // Configure PLL
-    // with(RCC.PLLCFGR)
-    // {
-    //     setValue
-    //     !(
-    //           PLLSRC, true // HSE
-    //         , PLLM,   8
-    //         , PLLN,   360
-    //         , PLLP,   2
-    //         , PLLQ,   7
-    //     )();
-    // }
-
-    // // Turn on PLL
-    // RCC.CR.PLLON = true;
-    // while(!RCC.CR.PLLRDY){ }
-
-    // // Select the main PLL as system clock source
-    // RCC.CFGR.SW = 0b10; // PLL
-    // while(RCC.CFGR.SWS != RCC.CFGR.SW) { }
-
-    // // random number generator
-    // random.init();
-
-    // // status LED
-    // statusLED.init();
-
-    // //Initialize the LCD
-	// lcd.init();
+    // Select the main PLL as system clock source
+    RCC.CFGR.SW = 0b10; // PLL
+    while(RCC.CFGR.SWS != RCC.CFGR.SW) { }
 
     // Call C-main
     main();

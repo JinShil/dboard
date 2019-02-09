@@ -7,10 +7,11 @@ import arm.memory;
 import stm32f103xx.rcc;
 // import stm32f103xx.pwr;
 import stm32f103xx.flash;
-// import stm32f103xx.gpio;
+import stm32f103xx.nvic;
 
 public import maplemini.trace;
 public import led = maplemini.led;
+public import usb = maplemini.usb;
 
 // Program's main function
 extern(C) void main();
@@ -20,11 +21,11 @@ alias ISR = void function();
 
 //----------------------------------------------------------------------
 // Alias Interrupt Service Routine function pointers
-// These are marked extern(C) to avoid name mangling, so we can refer to
-// them in our linker script
+// This are marked `extern(C)`` to avoid name mangling, so we can refer to
+// it in our linker script
 //----------------------------------------------------------------------
 
-private extern(C) immutable ISR[72] _vectorTable =
+private extern(C) immutable ISR[75] _vectorTable =
 [
       &onReset
     , &defaultHandler
@@ -32,6 +33,9 @@ private extern(C) immutable ISR[72] _vectorTable =
     , &defaultHandler
     , &onBusFault
     , &onUsageFault
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
     , &defaultHandler
     , &defaultHandler
     , &defaultHandler
@@ -64,7 +68,7 @@ private extern(C) immutable ISR[72] _vectorTable =
     , &defaultHandler
     , &onUSBHighPriority
 
-    , &onUSBLowPriority  // USB_LP_CAN_RX0
+    , &usb.interrupt  // USB_LP_CAN_RX0
     , &defaultHandler
     , &defaultHandler
     , &defaultHandler
@@ -155,16 +159,15 @@ private void onUsageFault()
 private void onUSBHighPriority()
 {
     writeln!"USB High Priority Interrupt";
-}
-
-private void onUSBLowPriority()
-{
-    writeln!"USB Low Priority Interrupt";
+    while(true)
+    { }
 }
 
 private void onUSBWakeup()
 {
     writeln!"USB Wakeup Interrupt";
+    while(true)
+    { }
 }
 
 // defined in the linker
@@ -174,7 +177,7 @@ extern(C) extern __gshared ubyte __data_end__;
 extern(C) extern __gshared ubyte __bss_start__;
 extern(C) extern __gshared ubyte __bss_end__;
 
-extern(C) void hardwareInit()
+void hardwareInit()
 {
     // copy data segment out of ROM and into RAM
     memcpy(&__data_start__, &__text_end__, &__data_end__ - &__data_start__);
@@ -248,6 +251,8 @@ extern(C) void hardwareInit()
     while(RCC.CFGR.SWS != RCC.CFGR.SW) { }
 
     led.init();
+
+    usb.init();
 
     // Call C-main
     main();

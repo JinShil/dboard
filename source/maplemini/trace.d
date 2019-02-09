@@ -1,9 +1,12 @@
 module maplemini.trace;
 
+nothrow:
+@safe:
+
 import arm.semihosting;
 import arm.memory;
 
-void write(string s)()
+void write(string s)() @trusted
 {
     arm.semihosting.write((s ~ '\0').ptr);
 }

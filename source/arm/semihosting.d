@@ -97,6 +97,8 @@ private enum SYS
     WRITE0       = 0x04
 }
 
+nothrow:
+
 /**
 Performs a semihosting operation.
 Params:

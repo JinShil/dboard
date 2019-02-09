@@ -24,7 +24,7 @@ alias ISR = void function();
 // them in our linker script
 //----------------------------------------------------------------------
 
-private extern(C) immutable ISR[15] _vectorTable =
+private extern(C) immutable ISR[80] _vectorTable =
 [
       &onReset
     , &defaultHandler
@@ -39,9 +39,90 @@ private extern(C) immutable ISR[15] _vectorTable =
     , &defaultHandler
     , &defaultHandler
 
+    , &defaultHandler    // WWDG
     , &defaultHandler
     , &defaultHandler
     , &defaultHandler
+
+    , &defaultHandler    // FLASH
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // EXTI2
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // DMA1_Channel2
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // DMA1_Channel6
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // CAN1_RX0
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // TIM1_BRK
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // TIM2
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // I2C1_ER
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // SPI2
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // EXTI15_10
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // 44 Reserved
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // 48 Reserved
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // 52 UART4
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // 56 DMA1_Channel1
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // 60 DMA1_Channel5
+    , &defaultHandler
+    , &defaultHandler
+    , &defaultHandler
+
+    , &defaultHandler    // 64 CAN2_RX0
+    , &defaultHandler
+    , &defaultHandler
+    , &onUSBInterrupt
 ];
 
 /// Software entry point
@@ -51,6 +132,13 @@ void onReset()
     // RCC.AHB1ENR.CCMDATARAMEN = true;
 
     hardwareInit();
+}
+
+private void defaultHandler()
+{
+    writeln!"Default Handler";
+    while(true)
+    { }
 }
 
 private void onHardFault()
@@ -74,13 +162,10 @@ private void onUsageFault()
     { }
 }
 
-private void defaultHandler()
+private void onUSBInterrupt()
 {
-    writeln!"Default Handler";
-    while(true)
-    { }
-}
 
+}
 
 // defined in the linker
 extern(C) extern __gshared ubyte __text_end__;

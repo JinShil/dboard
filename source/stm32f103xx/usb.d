@@ -30,7 +30,7 @@ final abstract class USB : Peripheral!(0x40005C00)
         /*********************************************************************
          Correct Transfer for transmission
         */
-        alias CTR_TX = Bit!(7, Mutability.rw);
+        alias CTR_TX = Bit!(7, Mutability.rc_w0);
 
         /*********************************************************************
          Endpoint kind
@@ -60,7 +60,7 @@ final abstract class USB : Peripheral!(0x40005C00)
         /*********************************************************************
          Correct transfer for reception
         */
-        alias CTR_RX = Bit!(15, Mutability.rw);
+        alias CTR_RX = Bit!(15, Mutability.rc_w0);
     }
 
     /*************************************************************************

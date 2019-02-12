@@ -2,7 +2,7 @@
 MEMORY
 {
     SRAM (rxw) : ORIGIN = 0x20000000, LENGTH = 20k
-    FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 64k
+    FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 128k
 }
 
 _stackStart = ORIGIN(SRAM) + 4k; /* Falling stack */

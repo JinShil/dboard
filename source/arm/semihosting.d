@@ -105,7 +105,7 @@ Params:
     command = The semihosting operation to perform
     message = The message to accompany the operation
 */
-private int call(in SYS operation, in void* message)
+private int call(const SYS operation, const scope void* message) @trusted
 {
     int value = void;
 
@@ -138,6 +138,8 @@ private int call(in SYS operation, in void* message)
     return value;
 }
 
+@safe:
+
 /**
 Writes data to a file handle returned from a call to open
 Params:
@@ -148,7 +150,7 @@ Returns:
 See Also:
     open
 */
-size_t write(T)(in size_t fileHandle, in T[] data)
+size_t write(T)(const size_t fileHandle, const scope T[] data)
 {
     uint[3] message =
     [
@@ -164,7 +166,7 @@ Writes a single 8-bit item to the debug channel.
 Params:
     data = The 8-bit item to write
 */
-void write(T)(in T data)
+void write(T)(const T data)
     if(T.sizeof == ubyte.sizeof)
 {
     call(SYS.WRITEC, &data);
@@ -175,7 +177,7 @@ Writes a null-terminated array of 8-bit items to the debug channel.
 Params:
     data = The null-terminated array of 8-bit items to write
 */
-void write(T)(in T* data)
+void write(T)(const scope T* data)
     if (T.sizeof == ubyte.sizeof)
 {
     call(SYS.WRITE0, data);

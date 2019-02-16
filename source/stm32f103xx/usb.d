@@ -534,52 +534,52 @@ final abstract class USB : Peripheral!(0x40005C00)
         /*********************************************************************
          Endpoint Identifier
         */
-        alias EP_ID = BitField!(3, 0, Mutability.rw);
+        alias EP_ID = BitField!(3, 0, Mutability.r);
 
         /*********************************************************************
          Direction of transaction
         */
-        alias DIR = Bit!(4, Mutability.rw);
+        alias DIR = Bit!(4, Mutability.r);
 
         /*********************************************************************
          Expected start frame
         */
-        alias ESOF = Bit!(8, Mutability.rw);
+        alias ESOF = Bit!(8, Mutability.rc_w0);
 
         /*********************************************************************
          start of frame
         */
-        alias SOF = Bit!(9, Mutability.rw);
+        alias SOF = Bit!(9, Mutability.rc_w0);
 
         /*********************************************************************
          reset request
         */
-        alias RESET = Bit!(10, Mutability.rw);
+        alias RESET = Bit!(10, Mutability.rc_w0);
 
         /*********************************************************************
          Suspend mode request
         */
-        alias SUSP = Bit!(11, Mutability.rw);
+        alias SUSP = Bit!(11, Mutability.rc_w0);
 
         /*********************************************************************
          Wakeup
         */
-        alias WKUP = Bit!(12, Mutability.rw);
+        alias WKUP = Bit!(12, Mutability.rc_w0);
 
         /*********************************************************************
          Error
         */
-        alias ERR = Bit!(13, Mutability.rw);
+        alias ERR = Bit!(13, Mutability.rc_w0);
 
         /*********************************************************************
          Packet memory area over / underrun
         */
-        alias PMAOVR = Bit!(14, Mutability.rw);
+        alias PMAOVR = Bit!(14, Mutability.rc_w0);
 
         /*********************************************************************
          Correct transfer
         */
-        alias CTR = Bit!(15, Mutability.rw);
+        alias CTR = Bit!(15, Mutability.r);
     }
 
     /*************************************************************************

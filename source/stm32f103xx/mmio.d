@@ -291,7 +291,7 @@ static auto isForBitsOnly(immutable Mutability m) @safe pure nothrow
 /***********************************************************************
  Provides information about a bit field given the specified bit indices
 */
-mixin template BitFieldDimensions(BitIndex bitIndex0, BitIndex bitIndex1)
+private mixin template BitFieldDimensions(BitIndex bitIndex0, BitIndex bitIndex1)
 {
     /***************************************************************
         Index of this BitField's most significant Bit
@@ -398,7 +398,7 @@ mixin template BitFieldDimensions(BitIndex bitIndex0, BitIndex bitIndex1)
 /***********************************************************************
  Provides access and mutability enforcement for a bitfield.
 */
-mixin template BitFieldMutation(Mutability mutability, ValueType_)
+private mixin template BitFieldMutation(Mutability mutability, ValueType_)
 {
     alias ValueType = ValueType_;
 
@@ -523,7 +523,7 @@ mixin template BitFieldMutation(Mutability mutability, ValueType_)
  version automatically determines the return type based on the size
  of the bitfield.
 */
-mixin template BitFieldImplementation(BitIndex bitIndex0, BitIndex bitIndex1, Mutability mutability)
+private mixin template BitFieldImplementation(BitIndex bitIndex0, BitIndex bitIndex1, Mutability mutability)
 {
     mixin BitFieldDimensions!(bitIndex0, bitIndex1);
 
@@ -556,7 +556,7 @@ mixin template BitFieldImplementation(BitIndex bitIndex0, BitIndex bitIndex1, Mu
  Provides access to a limited range of bits in a register. User
  must specify the return type.
 */
-mixin template BitFieldImplementation(BitIndex bitIndex0, BitIndex bitIndex1, Mutability mutability, ValueType)
+private mixin template BitFieldImplementation(BitIndex bitIndex0, BitIndex bitIndex1, Mutability mutability, ValueType)
 {
     mixin BitFieldDimensions!(bitIndex0, bitIndex1);
     mixin BitFieldMutation!(mutability, ValueType);
@@ -571,6 +571,35 @@ abstract class Peripheral(Address peripheralAddress)
         Gets this peripheral's address as specified in the datasheet
     */
     static immutable auto address = peripheralAddress;
+
+    /***********************************************************************
+      Static field within the Peripheral
+    */
+    abstract class Field(ptrdiff_t addressOffset, ValueType)
+    {
+        /***********************************************************************
+          The absolute address of this field
+        */
+        static immutable auto address = peripheralAddress + addressOffset;
+
+        /***********************************************************************
+          Reads and returns the value at this Field's address
+        */
+        @inline pragma(inline, true) static auto value() @property @trusted nothrow
+        {
+            return volatileLoad(cast(ValueType*)address);
+        }
+
+        /***********************************************************************
+          Sets the value at this Field's address
+        */
+        @inline pragma(inline, true) static void value(immutable ValueType value) @property @trusted nothrow
+        {
+            volatileStore(cast(ValueType*)address, value);
+        }
+
+        static alias value this;
+    }
 
     /***********************************************************************
       A register for this peripheral

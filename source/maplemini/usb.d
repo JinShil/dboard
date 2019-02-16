@@ -12,11 +12,14 @@ import stm32f103xx.otg_fs_global;
 import maplemini.trace;
 import stm32f103xx.mmio;
 
+enum PMA_ADDRESS = 0x4000_6000;
+enum EP0_RX_ADDRESS = 0x40;
+
 /*****************************************************************************
  Buffer descriptor table
 */
 private final abstract class BTableTemplate(ubyte endPointNumber) 
-    : Peripheral!(0x4000_6000 + (endPointNumber * 16))
+    : Peripheral!(PMA_ADDRESS + (endPointNumber * 16))
 {
     final abstract class TX_ADDR : Register!(0x00)
     {
@@ -43,6 +46,27 @@ private final abstract class BTableTemplate(ubyte endPointNumber)
 
 alias EndPoint0BTable = BTableTemplate!0;
 alias EndPoint1BTable = BTableTemplate!1;
+
+private final abstract class SetupPacket
+    : Peripheral!(PMA_ADDRESS + (EP0_RX_ADDRESS * 2))
+{
+    final abstract class RequestType : Register!(0x00)
+    {
+        alias Direction = Bit!(7, Mutability.r);
+
+        alias Type = BitField!(6, 5, Mutability.r);
+
+        alias Recipient = BitField!(4, 0, Mutability.r);
+    }
+
+    alias Request = Field!(0x01, ubyte);
+
+    alias Value = Field!(0x04, ushort);
+
+    alias Index = Field!(0x08, ushort);
+
+    alias Length = Field!(0x0C, ushort);
+}
 
 package void interrupt()
 {
@@ -83,7 +107,37 @@ package void interrupt()
     if (USB.ISTR.PMAOVR.value)
         writeln!"PMAOVR";
     if (USB.ISTR.CTR.value)
-        writeln!"CTR";
+    {
+        // CTR interrupt flag is read-only
+
+        correctTransfer();
+    }
+}
+
+private void correctTransfer()
+{
+    if (USB.ISTR.EP_ID == 0)
+    {
+        if (USB.ISTR.DIR.value)
+        {
+            writeln!"out";
+            if (USB.EP0R.SETUP.value)
+            {
+                writeln!"setup";
+                writeln(SetupPacket.Length.value);
+            }
+            USB.EP0R.STAT_RX = false;
+        }
+        else
+        {
+            writeln!"in";
+            USB.EP0R.STAT_TX = false;
+        }
+    }
+    else
+    {
+        writeln!"Unknown endpoint";
+    }
 }
 
 private void suspend()
@@ -121,7 +175,7 @@ private void reset()
     USB.BTABLE.BTABLE = 0;
 
     EndPoint0BTable.TX_ADDR.ADDR = 0x80;
-    EndPoint0BTable.RX_ADDR.ADDR = 0x40;
+    EndPoint0BTable.RX_ADDR.ADDR = EP0_RX_ADDRESS;
 
     with(EndPoint0BTable.RX_COUNT)
     {
@@ -143,11 +197,6 @@ private void reset()
             , STAT_RX, 0b11  // valid
         );
     }
-
-    // if (USB.EP0R.value != 0b11_0_01_0_0_0_01_0000)
-    // {
-    //     writeln!"Not right";
-    // }
 
     USB.EP1R.EA = 1;
     USB.EP2R.EA = 2;
@@ -220,7 +269,6 @@ package void init()
         setValue
         !(
               PMAOVR, false
-            , CTR,    false
             , ERR,    false
             , WKUP,   false
             , SUSP,   false

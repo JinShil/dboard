@@ -5,6 +5,7 @@ TBA
 # References
 
   * [Maple Mini](https://www.leaflabs.com/maple/)
+  * [Maple Mini Schematic](https://github.com/leaflabs/maplemini/blob/master/maplemini.pdf)
   * [STM32F103CB Website](https://www.st.com/en/microcontrollers/stm32f103cb.html)
   * [STM32F103CB Datasheet](https://www.st.com/resource/en/datasheet/stm32f103cb.pdf)
   * [STM32F103xx Reference Manual](https://www.st.com/content/ccc/resource/technical/document/reference_manual/59/b9/ba/7f/11/af/43/d5/CD00171190.pdf/files/CD00171190.pdf/jcr:content/translations/en.CD00171190.pdf)

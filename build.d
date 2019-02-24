@@ -100,6 +100,6 @@ void main(string[] args)
     run(cmd);
 
     // display the size
-    run("arm-none-eabi-size " ~ outputFile);
+    run("arm-none-eabi-size -A " ~outputFile);
 }
 
